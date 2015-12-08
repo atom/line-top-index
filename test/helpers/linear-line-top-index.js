@@ -10,6 +10,10 @@ export default class LineTopIndex {
     this.defaultLineHeight = lineHeight
   }
 
+  getMaxRow () {
+    return this.maxRow
+  }
+
   insertBlock (row, height) {
     let id = this.idCounter++
     this.blocks.push({id, row, height})
@@ -67,10 +71,6 @@ export default class LineTopIndex {
     let linesHeight = row * this.defaultLineHeight
     let blocksHeight = this.blocks.filter((block) => block.row <= row).reduce((a, b) => a + b.height, 0)
     return linesHeight + blocksHeight
-  }
-
-  bottomPixelPositionForRow (row) {
-    return this.pixelPositionForRow(row + 1) - this.defaultLineHeight
   }
 
   rowForPixelPosition (top, strategy) {
