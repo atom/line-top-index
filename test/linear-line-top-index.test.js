@@ -4,9 +4,7 @@ describe('LineTopIndex', function () {
   let lineTopIndex
 
   beforeEach(function () {
-    lineTopIndex = new LineTopIndex()
-    lineTopIndex.setDefaultLineHeight(10)
-    lineTopIndex.setMaxRow(12)
+    lineTopIndex = new LineTopIndex({defaultLineHeight: 10, maxRow: 12})
   })
 
   describe('.prototype.pixelPositionForRow(row)', function () {
@@ -145,7 +143,7 @@ describe('LineTopIndex', function () {
       assert.equal(lineTopIndex.rowForPixelPosition((6 * 10) + 20), 6)
     })
 
-    it.only('moves blocks down/up when splicing regions', function () {
+    it('moves blocks down/up when splicing regions', function () {
       let block1 = lineTopIndex.insertBlock(3, 20)
       let block2 = lineTopIndex.insertBlock(5, 30)
 

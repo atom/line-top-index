@@ -1,17 +1,13 @@
 export default class LineTopIndex {
-  constructor () {
+  constructor (params = {}) {
     this.idCounter = 1
     this.blocks = []
-    this.maxRow = 0
-    this.defaultLineHeight = 0
+    this.maxRow = params.maxRow || 0
+    this.setDefaultLineHeight(params.defaultLineHeight || 0)
   }
 
   setDefaultLineHeight (lineHeight) {
     this.defaultLineHeight = lineHeight
-  }
-
-  setMaxRow (maxRow) {
-    this.maxRow = maxRow
   }
 
   insertBlock (row, height) {
@@ -63,7 +59,7 @@ export default class LineTopIndex {
       }
     })
 
-    this.setMaxRow(this.maxRow + newExtent - oldExtent)
+    this.maxRow = this.maxRow + newExtent - oldExtent
   }
 
   pixelPositionForRow (row) {
