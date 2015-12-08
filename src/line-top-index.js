@@ -1,9 +1,11 @@
 import Random from 'random-seed'
 import Iterator from './iterator'
 
-export default class Patch {
-  constructor (seed = Date.now()) {
-    this.randomGenerator = new Random(seed)
+export default class LineTopIndex {
+  constructor (params = {}) {
+    this.maxRow = params.maxRow || 0
+    this.defaultLineHeight = params.defaultLineHeight || 0
+    this.randomGenerator = new Random(params.seed || Date.now())
     this.root = null
     this.iterator = this.buildIterator()
   }
@@ -12,8 +14,19 @@ export default class Patch {
     return new Iterator(this)
   }
 
-  spliceWithText (start, replacedExtent, replacementText) {
-    this.splice(start, replacedExtent, getExtent(replacementText), {text: replacementText})
+  insertBlock (row, height) {
+    let node = this.iterator.insertBlockEnd(row)
+    node.distanceFromLeftAncestor.pixels += height
+    while (node.parent && node.parent.left === node) {
+      node = node.parent
+      node.distanceFromLeftAncestor.pixels += height
+    }
+  }
+
+  pixelPositionForRow (row) {
+    console.log(row, this.defaultLineHeight, this.iterator.totalBlockPixelsPrecedingRow(row));
+
+    return (row * this.defaultLineHeight) + this.iterator.totalBlockPixelsPrecedingRow(row)
   }
 
   splice (outputStart, replacedExtent, replacementExtent, options) {
@@ -40,70 +53,6 @@ export default class Patch {
     this.bubbleNodeDown(startNode)
     endNode.priority = this.generateRandom()
     this.bubbleNodeDown(endNode)
-  }
-
-  spliceInput (inputStart, replacedExtent, replacementExtent) {
-    let inputOldEnd = traverse(inputStart, replacedExtent)
-    let inputNewEnd = traverse(inputStart, replacementExtent)
-
-    let startNode = this.iterator.insertSpliceInputBoundary(inputStart, true)
-    let endNode = this.iterator.insertSpliceInputBoundary(inputOldEnd, false)
-
-    startNode.priority = -1
-    this.bubbleNodeUp(startNode)
-    endNode.priority = -2
-    this.bubbleNodeUp(endNode)
-
-    startNode.right = null
-    startNode.inputExtent = startNode.inputLeftExtent
-    startNode.outputExtent = startNode.outputLeftExtent
-
-    let endNodeInputRightExtent = traversalDistance(endNode.inputExtent, endNode.inputLeftExtent)
-    let endNodeOutputRightExtent = traversalDistance(endNode.outputExtent, endNode.outputLeftExtent)
-    endNode.inputLeftExtent = inputNewEnd
-    endNode.inputExtent = traverse(endNode.inputLeftExtent, endNodeInputRightExtent)
-    endNode.outputLeftExtent = traverse(startNode.outputLeftExtent, replacementExtent)
-    endNode.outputExtent = traverse(endNode.outputLeftExtent, endNodeOutputRightExtent)
-
-    if (startNode.isChangeStart) {
-      this.deleteNode(startNode)
-    } else {
-      startNode.priority = this.generateRandom()
-      this.bubbleNodeDown(startNode)
-    }
-
-    if (endNode.isChangeStart) {
-      endNode.priority = this.generateRandom()
-      this.bubbleNodeDown(endNode)
-    } else {
-      this.deleteNode(endNode)
-    }
-  }
-
-  isChangedAtInputPosition (inputPosition) {
-    this.iterator.seekToInputPosition(inputPosition)
-    return this.iterator.inChange()
-  }
-
-  isChangedAtOutputPosition (outputPosition) {
-    this.iterator.seekToOutputPosition(outputPosition)
-    return this.iterator.inChange()
-  }
-
-  translateInputPosition (inputPosition) {
-    this.iterator.seekToInputPosition(inputPosition)
-    let overshoot = traversalDistance(inputPosition, this.iterator.getInputStart())
-    return minPoint(traverse(this.iterator.getOutputStart(), overshoot), this.iterator.getOutputEnd())
-  }
-
-  translateOutputPosition (outputPosition) {
-    this.iterator.seekToOutputPosition(outputPosition)
-    let overshoot = traversalDistance(outputPosition, this.iterator.getOutputStart())
-    return minPoint(traverse(this.iterator.getInputStart(), overshoot), this.iterator.getInputEnd())
-  }
-
-  getChanges () {
-    return this.iterator.getChanges()
   }
 
   deleteNode (node) {
