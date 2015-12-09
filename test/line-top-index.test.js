@@ -50,8 +50,6 @@ function performInsertion (random, actualIndex, referenceIndex) {
   let row = random(referenceIndex.getMaxRow() + 1)
   let height = random(100 + 1)
 
-  console.log(row, height);
-
   referenceIndex.insertBlock(row, height)
   actualIndex.insertBlock(row, height)
 }

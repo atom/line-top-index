@@ -27,8 +27,6 @@ export default class LineTopIndex {
   }
 
   pixelPositionForRow (row) {
-    console.log(row, this.defaultLineHeight, this.iterator.totalBlockPixelsPrecedingRow(row));
-
     return (row * this.defaultLineHeight) + this.iterator.totalBlockPixelsPrecedingRow(row)
   }
 
