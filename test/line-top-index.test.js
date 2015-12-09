@@ -10,12 +10,12 @@ describe('LineTopIndex', () => {
       let seed = Date.now()
       let random = new Random(seed)
 
-      let maxRow = random(50)
+      let maxRow = random.intBetween(10, 50)
       let defaultLineHeight = 10
       let referenceIndex = new LinearLineTopIndex({defaultLineHeight, maxRow})
       let actualIndex = new LineTopIndex({defaultLineHeight, maxRow})
 
-      for (let j = 0; j < 10; j++) {
+      for (let j = 0; j < 50; j++) {
         performInsertion(random, actualIndex, referenceIndex)
 
         // let k = random(10)

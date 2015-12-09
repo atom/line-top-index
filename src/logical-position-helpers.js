@@ -7,6 +7,13 @@ export function add (a, b) {
   }
 }
 
+export function subtract (a, b) {
+  return {
+    rows: a.rows - b.rows,
+    pixels: a.pixels - b.pixels
+  }
+}
+
 export function format (position) {
   return `(rows: ${position.rows}, pixels: ${position.pixels})`
 }

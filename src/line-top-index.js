@@ -1,5 +1,6 @@
 import Random from 'random-seed'
 import Iterator from './iterator'
+import {add as addLogicalPositions, subtract as subtractLogicalPositions} from './logical-position-helpers'
 
 export default class LineTopIndex {
   constructor (params = {}) {
@@ -16,9 +17,13 @@ export default class LineTopIndex {
 
   insertBlock (row, height) {
     let node = this.iterator.insertBlockEnd(row)
+    if (node.priority == null) {
+      node.priority = this.generateRandom()
+      this.bubbleNodeUp(node)
+    }
+
     node.distanceFromLeftAncestor.pixels += height
     node.blockHeight += height
-
     while (node.parent) {
       if (node.parent.left === node) {
         node.parent.distanceFromLeftAncestor.pixels += height
@@ -130,13 +135,7 @@ export default class LineTopIndex {
     pivot.left = root
     pivot.left.parent = pivot
 
-    pivot.inputLeftExtent = traverse(root.inputLeftExtent, pivot.inputLeftExtent)
-    pivot.inputExtent = traverse(pivot.inputLeftExtent, (pivot.right ? pivot.right.inputExtent : ZERO_POINT))
-    root.inputExtent = traverse(root.inputLeftExtent, (root.right ? root.right.inputExtent : ZERO_POINT))
-
-    pivot.outputLeftExtent = traverse(root.outputLeftExtent, pivot.outputLeftExtent)
-    pivot.outputExtent = traverse(pivot.outputLeftExtent, (pivot.right ? pivot.right.outputExtent : ZERO_POINT))
-    root.outputExtent = traverse(root.outputLeftExtent, (root.right ? root.right.outputExtent : ZERO_POINT))
+    pivot.distanceFromLeftAncestor = addLogicalPositions(root.distanceFromLeftAncestor, pivot.distanceFromLeftAncestor)
   }
 
   rotateNodeRight (pivot) {
@@ -161,13 +160,7 @@ export default class LineTopIndex {
     pivot.right = root
     pivot.right.parent = pivot
 
-    root.inputLeftExtent = traversalDistance(root.inputLeftExtent, pivot.inputLeftExtent)
-    root.inputExtent = traversalDistance(root.inputExtent, pivot.inputLeftExtent)
-    pivot.inputExtent = traverse(pivot.inputLeftExtent, root.inputExtent)
-
-    root.outputLeftExtent = traversalDistance(root.outputLeftExtent, pivot.outputLeftExtent)
-    root.outputExtent = traversalDistance(root.outputExtent, pivot.outputLeftExtent)
-    pivot.outputExtent = traverse(pivot.outputLeftExtent, root.outputExtent)
+    root.distanceFromLeftAncestor = subtractLogicalPositions(root.distanceFromLeftAncestor, pivot.distanceFromLeftAncestor)
   }
 
   generateRandom () {

@@ -7,7 +7,7 @@ export default class Node {
     this.right = null
     this.distanceFromLeftAncestor = distanceFromLeftAncestor
     this.id = ++idCounter
-    this.priority = Infinity
+    this.priority = null
     this.blockHeight = 0
   }
 }
