@@ -66,6 +66,37 @@ export default class Iterator {
     }
   }
 
+  rowForPixelPosition (pixelPosition, lineHeight) {
+    this.reset()
+
+    if (!this.currentNode) return pixelPosition / lineHeight
+
+    let blockStart, blockEnd
+    while (true) {
+      blockEnd = (this.currentPosition.rows * lineHeight) + this.currentPosition.pixels
+      blockStart = blockEnd - this.currentNode.blockHeight
+
+      if (blockStart <= pixelPosition && pixelPosition <= blockEnd) {
+        return this.currentPosition.rows
+      } else if (pixelPosition < blockStart) {
+        if (this.currentNode.left) {
+          this.descendLeft()
+        } else {
+          let previousBlockEnd = (this.leftAncestorPosition.rows * lineHeight) + this.leftAncestorPosition.pixels
+          let overshoot = pixelPosition - previousBlockEnd
+          return this.leftAncestorPosition.rows + Math.floor(overshoot / lineHeight)
+        }
+      } else { // pixelPosition > blockEnd
+        if (this.currentNode.right) {
+          this.descendRight()
+        } else {
+          let overshoot = pixelPosition - blockEnd
+          return this.currentPosition.rows + Math.floor(overshoot / lineHeight)
+        }
+      }
+    }
+  }
+
   setCurrentNode (node) {
     if (!node) return
     this.currentNode = node

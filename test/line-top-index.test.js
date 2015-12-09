@@ -3,7 +3,9 @@ import LinearLineTopIndex from './helpers/linear-line-top-index'
 import LineTopIndex from '../src/line-top-index'
 
 describe('LineTopIndex', () => {
-  it.only('determines line heights correctly after randomized insertions, removals, and splices', () => {
+  it.only('determines line heights correctly after randomized insertions, removals, and splices', function () {
+    this.timeout(Infinity)
+
     for (let i = 0; i < 1000; i++) {
       let seed = Date.now()
       let random = new Random(seed)
@@ -13,7 +15,7 @@ describe('LineTopIndex', () => {
       let referenceIndex = new LinearLineTopIndex({defaultLineHeight, maxRow})
       let actualIndex = new LineTopIndex({defaultLineHeight, maxRow})
 
-      for (let j = 0; j < 5; j++) {
+      for (let j = 0; j < 10; j++) {
         performInsertion(random, actualIndex, referenceIndex)
 
         // let k = random(10)
@@ -42,7 +44,7 @@ function verifyIndex (random, actualIndex, referenceIndex, message) {
     let betweenRowsPixelPosition = random.intBetween(rowPixelPosition, nextRowPixelPosition)
 
     assert.equal(actualIndex.pixelPositionForRow(row), rowPixelPosition, message)
-    // assert.equal(actualIndex.rowForPixelPosition(betweenRowsPixelPosition), referenceIndex.rowForPixelPosition(betweenRowsPixelPosition), message)
+    assert.equal(actualIndex.rowForPixelPosition(betweenRowsPixelPosition), referenceIndex.rowForPixelPosition(betweenRowsPixelPosition), message)
   }
 }
 

@@ -8,5 +8,6 @@ export default class Node {
     this.distanceFromLeftAncestor = distanceFromLeftAncestor
     this.id = ++idCounter
     this.priority = Infinity
+    this.blockHeight = 0
   }
 }

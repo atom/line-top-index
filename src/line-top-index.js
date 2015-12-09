@@ -17,17 +17,22 @@ export default class LineTopIndex {
   insertBlock (row, height) {
     let node = this.iterator.insertBlockEnd(row)
     node.distanceFromLeftAncestor.pixels += height
+    node.blockHeight += height
+
     while (node.parent) {
       if (node.parent.left === node) {
         node.parent.distanceFromLeftAncestor.pixels += height
       }
-
       node = node.parent
     }
   }
 
   pixelPositionForRow (row) {
     return (row * this.defaultLineHeight) + this.iterator.totalBlockPixelsPrecedingRow(row)
+  }
+
+  rowForPixelPosition (pixelPosition) {
+    return this.iterator.rowForPixelPosition(pixelPosition, this.defaultLineHeight)
   }
 
   splice (outputStart, replacedExtent, replacementExtent, options) {
