@@ -69,7 +69,7 @@ export default class Iterator {
   rowForPixelPosition (pixelPosition, lineHeight) {
     this.reset()
 
-    if (!this.currentNode) return pixelPosition / lineHeight
+    if (!this.currentNode) return Math.floor(pixelPosition / lineHeight)
 
     let blockStart, blockEnd
     while (true) {
@@ -98,9 +98,10 @@ export default class Iterator {
   }
 
   setCurrentNode (node) {
-    if (!node) return
     this.currentNode = node
-    this.currentPosition = addLogicalPositions(this.leftAncestorPosition, node.distanceFromLeftAncestor)
+    if (this.currentNode) {
+      this.currentPosition = addLogicalPositions(this.leftAncestorPosition, this.currentNode.distanceFromLeftAncestor)
+    }
   }
 
   descendLeft () {

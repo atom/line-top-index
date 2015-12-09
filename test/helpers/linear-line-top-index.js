@@ -1,6 +1,5 @@
 export default class LineTopIndex {
   constructor (params = {}) {
-    this.idCounter = 1
     this.blocks = []
     this.maxRow = params.maxRow || 0
     this.setDefaultLineHeight(params.defaultLineHeight || 0)
@@ -14,11 +13,9 @@ export default class LineTopIndex {
     return this.maxRow
   }
 
-  insertBlock (row, height) {
-    let id = this.idCounter++
+  insertBlock (id, row, height) {
     this.blocks.push({id, row, height})
     this.blocks.sort((a, b) => a.row - b.row)
-    return id
   }
 
   resizeBlock (id, height) {

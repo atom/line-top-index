@@ -2,6 +2,8 @@ import Random from 'random-seed'
 import LinearLineTopIndex from './helpers/linear-line-top-index'
 import LineTopIndex from '../src/line-top-index'
 
+let idCounter
+
 describe('LineTopIndex', () => {
   it.only('determines line heights correctly after randomized insertions, removals, and splices', function () {
     this.timeout(Infinity)
@@ -14,18 +16,15 @@ describe('LineTopIndex', () => {
       let defaultLineHeight = 10
       let referenceIndex = new LinearLineTopIndex({defaultLineHeight, maxRow})
       let actualIndex = new LineTopIndex({defaultLineHeight, maxRow})
+      idCounter = 1
 
       for (let j = 0; j < 50; j++) {
-        performInsertion(random, actualIndex, referenceIndex)
-
-        // let k = random(10)
-        // if (k < 3) {
-        //   performInsertion(random, actualIndex, referenceIndex)
-        // } else if (k < 6) {
-        //   performRemoval(random, referenceIndex, referenceIndex)
-        // } else {
-        //   performSplice(random, referenceIndex, referenceIndex)
-        // }
+        let k = random(10)
+        if (k < 5) {
+          performInsertion(random, actualIndex, referenceIndex)
+        } else {
+          performRemoval(random, actualIndex, referenceIndex)
+        }
       }
 
       // document.write('<hr>')
@@ -51,9 +50,10 @@ function verifyIndex (random, actualIndex, referenceIndex, message) {
 function performInsertion (random, actualIndex, referenceIndex) {
   let row = random(referenceIndex.getMaxRow() + 1)
   let height = random(100 + 1)
+  let id = idCounter++
 
-  referenceIndex.insertBlock(row, height)
-  actualIndex.insertBlock(row, height)
+  referenceIndex.insertBlock(id, row, height)
+  actualIndex.insertBlock(id, row, height)
 }
 
 function performRemoval (random, actualIndex, referenceIndex) {
@@ -78,6 +78,6 @@ function performSplice (random, actualIndex, referenceIndex) {
 
 function getRandomBlockId (random, referenceIndex) {
   let blocks = referenceIndex.allBlocks()
-  let block = blocks[random(block.length)]
+  let block = blocks[random(blocks.length)]
   return block.id
 }

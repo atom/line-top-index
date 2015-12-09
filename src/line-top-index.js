@@ -9,27 +9,40 @@ export default class LineTopIndex {
     this.randomGenerator = new Random(params.seed || Date.now())
     this.root = null
     this.iterator = this.buildIterator()
+    this.blockEndNodesById = {}
+    this.blockHeightsById = {}
   }
 
   buildIterator () {
     return new Iterator(this)
   }
 
-  insertBlock (row, height) {
+  insertBlock (id, row, blockHeight) {
     let node = this.iterator.insertBlockEnd(row)
     if (node.priority == null) {
       node.priority = this.generateRandom()
       this.bubbleNodeUp(node)
     }
 
-    node.distanceFromLeftAncestor.pixels += height
-    node.blockHeight += height
-    while (node.parent) {
-      if (node.parent.left === node) {
-        node.parent.distanceFromLeftAncestor.pixels += height
-      }
-      node = node.parent
+    this.adjustNodeBlockHeight(node, +blockHeight)
+
+    node.blockCount++
+    this.blockEndNodesById[id] = node
+    this.blockHeightsById[id] = blockHeight
+  }
+
+  removeBlock (id) {
+    let node = this.blockEndNodesById[id]
+    let blockHeight = this.blockHeightsById[id]
+
+    this.adjustNodeBlockHeight(node, -blockHeight)
+    node.blockCount--
+    if (node.blockCount === 0) {
+      this.deleteNode(node)
     }
+
+    delete this.blockEndNodesById[id]
+    delete this.blockHeightsById[id]
   }
 
   pixelPositionForRow (row) {
@@ -74,14 +87,6 @@ export default class LineTopIndex {
         node.parent.left = null
       } else {
         node.parent.right = null
-        node.parent.inputExtent = node.parent.inputLeftExtent
-        node.parent.outputExtent = node.parent.outputLeftExtent
-        let ancestor = node.parent
-        while (ancestor.parent && ancestor.parent.right === ancestor) {
-          ancestor.parent.inputExtent = traverse(ancestor.parent.inputLeftExtent, ancestor.inputExtent)
-          ancestor.parent.outputExtent = traverse(ancestor.parent.outputLeftExtent, ancestor.outputExtent)
-          ancestor = ancestor.parent
-        }
       }
     } else {
       this.root = null
@@ -161,6 +166,17 @@ export default class LineTopIndex {
     pivot.right.parent = pivot
 
     root.distanceFromLeftAncestor = subtractLogicalPositions(root.distanceFromLeftAncestor, pivot.distanceFromLeftAncestor)
+  }
+
+  adjustNodeBlockHeight (node, delta) {
+    node.blockHeight += delta
+    node.distanceFromLeftAncestor.pixels += delta
+    while (node.parent) {
+      if (node.parent.left === node) {
+        node.parent.distanceFromLeftAncestor.pixels += delta
+      }
+      node = node.parent
+    }
   }
 
   generateRandom () {
