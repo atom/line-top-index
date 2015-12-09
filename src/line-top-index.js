@@ -17,9 +17,12 @@ export default class LineTopIndex {
   insertBlock (row, height) {
     let node = this.iterator.insertBlockEnd(row)
     node.distanceFromLeftAncestor.pixels += height
-    while (node.parent && node.parent.left === node) {
+    while (node.parent) {
+      if (node.parent.left === node) {
+        node.parent.distanceFromLeftAncestor.pixels += height
+      }
+
       node = node.parent
-      node.distanceFromLeftAncestor.pixels += height
     }
   }
 
