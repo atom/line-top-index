@@ -15,7 +15,7 @@ export default class Iterator {
     this.setCurrentNode(this.tree.root)
   }
 
-  insertBlockEnd (row) {
+  insertNode (row) {
     this.reset()
 
     if (!this.currentNode) {

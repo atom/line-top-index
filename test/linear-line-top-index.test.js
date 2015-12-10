@@ -77,7 +77,7 @@ describe('LineTopIndex', function () {
 
       assert.equal(lineTopIndex.pixelPositionForRow(0), (0 * 10) + 0)
       assert.equal(lineTopIndex.pixelPositionForRow(1), (1 * 10) + 0)
-      assert.equal(lineTopIndex.pixelPositionForRow(2), (2 * 10) + 0)
+      assert.equal(lineTopIndex.pixelPositionForRow(2), (2 * 10) + 20 + 30)
       assert.equal(lineTopIndex.pixelPositionForRow(3), (3 * 10) + 20 + 30)
       assert.equal(lineTopIndex.pixelPositionForRow(4), (4 * 10) + 20 + 30)
       assert.equal(lineTopIndex.pixelPositionForRow(5), (5 * 10) + 20 + 30)

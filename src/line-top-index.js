@@ -18,7 +18,7 @@ export default class LineTopIndex {
   }
 
   insertBlock (id, row, blockHeight) {
-    let node = this.iterator.insertBlockEnd(row)
+    let node = this.iterator.insertNode(row)
     if (node.priority == null) {
       node.priority = this.generateRandom()
       this.bubbleNodeUp(node)
@@ -26,7 +26,7 @@ export default class LineTopIndex {
 
     this.adjustNodeBlockHeight(node, +blockHeight)
 
-    node.blockCount++
+    node.blockIds.add(id)
     this.blockEndNodesById[id] = node
     this.blockHeightsById[id] = blockHeight
   }
@@ -36,8 +36,8 @@ export default class LineTopIndex {
     let blockHeight = this.blockHeightsById[id]
 
     this.adjustNodeBlockHeight(node, -blockHeight)
-    node.blockCount--
-    if (node.blockCount === 0) {
+    node.blockIds.delete(id)
+    if (node.blockIds.size === 0) {
       this.deleteNode(node)
     }
 
@@ -55,38 +55,63 @@ export default class LineTopIndex {
     this.blockHeightsById[id] = newBlockHeight
   }
 
+  splice (startRow, oldExtent, newExtent) {
+    let oldEndRow = startRow + oldExtent
+    let newEndRow = startRow + newExtent
+
+    let startNode = this.iterator.insertNode(startRow)
+    let endNode = this.iterator.insertNode(oldEndRow)
+
+    startNode.priority = -1
+    this.bubbleNodeUp(startNode)
+    endNode.priority = -2
+    this.bubbleNodeUp(endNode)
+
+    if (startNode !== endNode) {
+      let blockIdsToMove = new Set
+
+      startNode.blockIds.forEach(function (id) {
+        startNode.blockIds.delete(id)
+        blockIdsToMove.add(id)
+      })
+
+      if (startNode.right) {
+        this.collectBlockIdsForSubtree(startNode.right, blockIdsToMove)
+        startNode.right = null
+      }
+
+      blockIdsToMove.forEach(id => {
+        endNode.blockIds.add(id)
+        endNode.blockHeight += this.blockHeightsById[id]
+        this.blockEndNodesById[id] = endNode
+      })
+    }
+
+    endNode.distanceFromLeftAncestor.rows = newEndRow
+
+    if (startNode.blockIds.size > 0) {
+      startNode.priority = this.generateRandom()
+      this.bubbleNodeDown(startNode)
+    } else {
+      this.deleteNode(startNode)
+    }
+
+    if (endNode !== startNode) {
+      if (endNode.blockIds.size > 0) {
+        endNode.priority = this.generateRandom()
+        this.bubbleNodeDown(endNode)
+      } else {
+        this.deleteNode(endNode)
+      }
+    }
+  }
+
   pixelPositionForRow (row) {
     return (row * this.defaultLineHeight) + this.iterator.totalBlockPixelsPrecedingRow(row)
   }
 
   rowForPixelPosition (pixelPosition) {
     return this.iterator.rowForPixelPosition(pixelPosition, this.defaultLineHeight)
-  }
-
-  splice (outputStart, replacedExtent, replacementExtent, options) {
-    let outputOldEnd = traverse(outputStart, replacedExtent)
-    let outputNewEnd = traverse(outputStart, replacementExtent)
-
-    let {startNode, prefix} = this.iterator.insertSpliceStart(outputStart)
-    let {endNode, suffix, suffixExtent} = this.iterator.insertSpliceEnd(outputOldEnd)
-    startNode.priority = -1
-    this.bubbleNodeUp(startNode)
-    endNode.priority = -2
-    this.bubbleNodeUp(endNode)
-
-    startNode.right = null
-    startNode.inputExtent = startNode.inputLeftExtent
-    startNode.outputExtent = startNode.outputLeftExtent
-
-    let endNodeOutputRightExtent = traversalDistance(endNode.outputExtent, endNode.outputLeftExtent)
-    endNode.outputLeftExtent = traverse(outputNewEnd, suffixExtent)
-    endNode.outputExtent = traverse(endNode.outputLeftExtent, endNodeOutputRightExtent)
-    endNode.changeText = prefix + options.text + suffix
-
-    startNode.priority = this.generateRandom()
-    this.bubbleNodeDown(startNode)
-    endNode.priority = this.generateRandom()
-    this.bubbleNodeDown(endNode)
   }
 
   deleteNode (node) {
@@ -187,6 +212,14 @@ export default class LineTopIndex {
       }
       node = node.parent
     }
+  }
+
+  collectBlockIdsForSubtree (node, blockIds) {
+    node.blockIds.forEach(function (id) {
+      blockIds.add(id)
+    })
+    if (node.left) this.collectBlockIdsForSubtree(node.left, blockIds)
+    if (node.right) this.collectBlockIdsForSubtree(node.right, blockIds)
   }
 
   generateRandom () {

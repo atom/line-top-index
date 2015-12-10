@@ -5,7 +5,7 @@ import LineTopIndex from '../src/line-top-index'
 let idCounter
 
 describe('LineTopIndex', () => {
-  it.only('determines line heights correctly after randomized insertions, removals, and splices', function () {
+  it('determines line heights correctly after randomized insertions, removals, and splices', function () {
     this.timeout(Infinity)
 
     for (let i = 0; i < 1000; i++) {
@@ -26,12 +26,14 @@ describe('LineTopIndex', () => {
           performRemoval(random, actualIndex, referenceIndex)
         } else if (k < 7) {
           performResize(random, actualIndex, referenceIndex)
+        } else {
+          performSplice(random, actualIndex, referenceIndex)
         }
-      }
 
-      // document.write('<hr>')
-      // document.write(actualIndex.toHTML())
-      // document.write('<hr>')
+        // document.write('<hr>')
+        // document.write(actualIndex.toHTML())
+        // document.write('<hr>')
+      }
 
       verifyIndex(random, actualIndex, referenceIndex, `Seed: ${seed}`)
     }

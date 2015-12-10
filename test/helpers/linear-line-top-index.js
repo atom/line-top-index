@@ -51,11 +51,11 @@ export default class LineTopIndex {
 
   splice (startRow, oldExtent, newExtent) {
     this.blocks.forEach(function (block) {
-      if (block.row > startRow) {
+      if (block.row >= startRow) {
         if (block.row >= startRow + oldExtent) {
           block.row += newExtent - oldExtent
         } else {
-          block.row = startRow + newExtent + 1 // move block to row following splice
+          block.row = startRow + newExtent
         }
       }
     })
