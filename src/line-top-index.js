@@ -45,6 +45,16 @@ export default class LineTopIndex {
     delete this.blockHeightsById[id]
   }
 
+  resizeBlock (id, newBlockHeight) {
+    let node = this.blockEndNodesById[id]
+    let blockHeight = this.blockHeightsById[id]
+    let delta = newBlockHeight - blockHeight
+
+    this.adjustNodeBlockHeight(node, delta)
+
+    this.blockHeightsById[id] = newBlockHeight
+  }
+
   pixelPositionForRow (row) {
     return (row * this.defaultLineHeight) + this.iterator.totalBlockPixelsPrecedingRow(row)
   }

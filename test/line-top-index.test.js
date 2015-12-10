@@ -20,10 +20,12 @@ describe('LineTopIndex', () => {
 
       for (let j = 0; j < 50; j++) {
         let k = random(10)
-        if (k < 5) {
+        if (k < 3) {
           performInsertion(random, actualIndex, referenceIndex)
-        } else {
+        } else if (k < 5) {
           performRemoval(random, actualIndex, referenceIndex)
+        } else if (k < 7) {
+          performResize(random, actualIndex, referenceIndex)
         }
       }
 
@@ -62,6 +64,15 @@ function performRemoval (random, actualIndex, referenceIndex) {
   let id = getRandomBlockId(random, referenceIndex)
   referenceIndex.removeBlock(id)
   actualIndex.removeBlock(id)
+}
+
+function performResize (random, actualIndex, referenceIndex) {
+  if (referenceIndex.allBlocks().length === 0) return
+
+  let id = getRandomBlockId(random, referenceIndex)
+  let newHeight = random(100 + 1)
+  referenceIndex.resizeBlock(id, newHeight)
+  actualIndex.resizeBlock(id, newHeight)
 }
 
 function performSplice (random, actualIndex, referenceIndex) {
