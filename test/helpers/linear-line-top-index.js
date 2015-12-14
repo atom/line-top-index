@@ -1,3 +1,5 @@
+import {compare, traverse, traversal} from '../../src/point-helpers'
+
 export default class LineTopIndex {
   constructor (params = {}) {
     this.blocks = []
@@ -13,9 +15,9 @@ export default class LineTopIndex {
     return this.maxRow
   }
 
-  insertBlock (id, row, height) {
-    this.blocks.push({id, row, height})
-    this.blocks.sort((a, b) => a.row - b.row)
+  insertBlock (id, position, height) {
+    this.blocks.push({id, position, height})
+    this.blocks.sort((a, b) => compare(a.position, b.position))
   }
 
   resizeBlock (id, height) {
@@ -29,7 +31,7 @@ export default class LineTopIndex {
     let block = this.blocks.find((block) => block.id === id)
     if (block) {
       block.row = newRow
-      this.blocks.sort((a, b) => a.row - b.row)
+      this.blocks.sort((a, b) => compare(a.position, b.position))
     }
   }
 
@@ -44,29 +46,24 @@ export default class LineTopIndex {
     return this.blocks
   }
 
-  blocksHeightForRow (row) {
-    let blocksForRow = this.blocks.filter((block) => block.row === row)
-    return blocksForRow.reduce((a, b) => a + b.height, 0)
-  }
-
-  splice (startRow, oldExtent, newExtent) {
+  splice (start, oldExtent, newExtent) {
     this.blocks.forEach(function (block) {
-      if (block.row >= startRow) {
-        if (block.row >= startRow + oldExtent) {
-          block.row += newExtent - oldExtent
+      if (compare(block.position, start) >= 0) {
+        if (compare(block.position, traverse(start, oldExtent)) >= 0) {
+          block.position = traverse(block.position, traversal(newExtent, oldExtent))
         } else {
-          block.row = startRow + newExtent
+          block.position = traverse(start, newExtent)
         }
       }
     })
 
-    this.maxRow = this.maxRow + newExtent - oldExtent
+    this.maxRow = this.maxRow + newExtent.row - oldExtent.row
   }
 
   pixelPositionForRow (row) {
     row = Math.min(row, this.maxRow)
     let linesHeight = row * this.defaultLineHeight
-    let blocksHeight = this.blocks.filter((block) => block.row <= row).reduce((a, b) => a + b.height, 0)
+    let blocksHeight = this.blocks.filter((block) => block.position.row <= row).reduce((a, b) => a + b.height, 0)
     return linesHeight + blocksHeight
   }
 
