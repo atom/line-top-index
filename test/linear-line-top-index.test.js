@@ -100,6 +100,17 @@ describe('LineTopIndex', function () {
       assert.equal(lineTopIndex.pixelPositionForRow(8), (8 * 10) + 10 + 20 + 30)
       assert.equal(lineTopIndex.pixelPositionForRow(9), (9 * 10) + 10 + 20 + 30)
       assert.equal(lineTopIndex.pixelPositionForRow(10), (9 * 10) + 10 + 20 + 30)
+
+      lineTopIndex.splice({row: 0, column: 0}, {row: 4, column: 4}, {row: 1, column: 0})
+
+      assert.equal(lineTopIndex.pixelPositionForRow(0), (0 * 10))
+      assert.equal(lineTopIndex.pixelPositionForRow(1), (1 * 10) + 10 + 20 + 30)
+      assert.equal(lineTopIndex.pixelPositionForRow(2), (2 * 10) + 10 + 20 + 30)
+      assert.equal(lineTopIndex.pixelPositionForRow(3), (3 * 10) + 10 + 20 + 30)
+      assert.equal(lineTopIndex.pixelPositionForRow(4), (4 * 10) + 10 + 20 + 30)
+      assert.equal(lineTopIndex.pixelPositionForRow(5), (5 * 10) + 10 + 20 + 30)
+      assert.equal(lineTopIndex.pixelPositionForRow(6), (6 * 10) + 10 + 20 + 30)
+      assert.equal(lineTopIndex.pixelPositionForRow(7), (6 * 10) + 10 + 20 + 30)
     })
   })
 
