@@ -67,36 +67,22 @@ export default class LineTopIndex {
     return linesHeight + blocksHeight
   }
 
-  rowForPixelPosition (top, strategy) {
-    const roundingStrategy = strategy || 'floor'
-    let blocksHeight = 0
-    let lastRow = 0
-    let lastTop = 0
+  rowForPixelPosition (top) {
+    let precedingBlocksHeight = 0
+    let lastBlockBottom = 0
+    let lastBlockRow = 0
+
     for (let block of this.blocks) {
-      let nextBlocksHeight = blocksHeight + block.height
-      let linesHeight = block.position.row * this.defaultLineHeight
-      if (nextBlocksHeight + linesHeight > top) {
-        while (lastRow < block.position.row && lastTop + this.defaultLineHeight <= top) {
-          lastTop += this.defaultLineHeight
-          lastRow++
-        }
-        return lastRow
-      } else {
-        blocksHeight = nextBlocksHeight
-        lastRow = block.position.row
-        lastTop = blocksHeight + linesHeight
-      }
+      let nextBlockTop = precedingBlocksHeight + (block.position.row * this.defaultLineHeight)
+      if (nextBlockTop > top) break
+      lastBlockRow = block.position.row
+      lastBlockBottom = nextBlockTop + block.height
+      precedingBlocksHeight += block.height
     }
 
-    let remainingHeight = Math.max(0, top - lastTop)
-    let remainingRows = Math.min(this.maxRow, lastRow + remainingHeight / this.defaultLineHeight)
-    switch (roundingStrategy) {
-      case 'floor':
-        return Math.floor(remainingRows)
-      case 'ceil':
-        return Math.ceil(remainingRows)
-      default:
-        throw new Error(`Cannot use '${roundingStrategy}' as a rounding strategy!`)
-    }
+    let overshootInPixels = Math.max(0, top - lastBlockBottom)
+    let overshootInRows = Math.floor(overshootInPixels / this.defaultLineHeight)
+
+    return Math.min(this.maxRow, lastBlockRow + overshootInRows)
   }
 }
