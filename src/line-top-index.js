@@ -4,7 +4,6 @@ import {add as addLogicalPositions, subtract as subtractLogicalPositions} from '
 
 export default class LineTopIndex {
   constructor (params = {}) {
-    this.maxRow = params.maxRow || 0
     this.defaultLineHeight = params.defaultLineHeight || 0
     this.randomGenerator = new Random(params.seed || Date.now())
     this.root = null

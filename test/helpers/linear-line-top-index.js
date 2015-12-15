@@ -3,16 +3,11 @@ import {compare, traverse, traversal} from '../../src/point-helpers'
 export default class LinearLineTopIndex {
   constructor (params = {}) {
     this.blocks = []
-    this.maxRow = params.maxRow || 0
     this.setDefaultLineHeight(params.defaultLineHeight || 0)
   }
 
   setDefaultLineHeight (lineHeight) {
     this.defaultLineHeight = lineHeight
-  }
-
-  getMaxRow () {
-    return this.maxRow
   }
 
   insertBlock (id, position, isInclusive, height) {
@@ -69,12 +64,9 @@ export default class LinearLineTopIndex {
       }
     })
     this.sortBlocks()
-
-    this.maxRow = this.maxRow + traversal(newExtent, oldExtent).row
   }
 
   pixelPositionForRow (row) {
-    row = Math.min(row, this.maxRow)
     let linesHeight = row * this.defaultLineHeight
     let blocksHeight = this.blocks.filter((block) => block.position.row <= row).reduce((a, b) => a + b.height, 0)
     return linesHeight + blocksHeight
@@ -95,7 +87,6 @@ export default class LinearLineTopIndex {
 
     let overshootInPixels = Math.max(0, top - lastBlockBottom)
     let overshootInRows = Math.floor(overshootInPixels / this.defaultLineHeight)
-
-    return Math.min(this.maxRow, lastBlockRow + overshootInRows)
+    return lastBlockRow + overshootInRows
   }
 }
