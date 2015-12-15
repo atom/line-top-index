@@ -27,10 +27,10 @@ export default class LineTopIndex {
     }
   }
 
-  moveBlock (id, newRow) {
+  moveBlock (id, newPosition) {
     let block = this.blocks.find((block) => block.id === id)
     if (block) {
-      block.row = newRow
+      block.position = newPosition
       this.blocks.sort((a, b) => compare(a.position, b.position))
     }
   }
@@ -57,7 +57,7 @@ export default class LineTopIndex {
       }
     })
 
-    this.maxRow = this.maxRow + newExtent.row - oldExtent.row
+    this.maxRow = this.maxRow + traversal(newExtent, oldExtent).row
   }
 
   pixelPositionForRow (row) {
