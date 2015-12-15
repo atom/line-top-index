@@ -1,6 +1,7 @@
 import Random from 'random-seed'
 import Iterator from './iterator'
 import {add as addLogicalPositions, subtract as subtractLogicalPositions} from './logical-position-helpers'
+import {traverse} from './point-helpers'
 
 export default class LineTopIndex {
   constructor (params = {}) {
@@ -16,8 +17,8 @@ export default class LineTopIndex {
     return new Iterator(this)
   }
 
-  insertBlock (id, row, blockHeight) {
-    let node = this.iterator.insertNode(row)
+  insertBlock (id, position, inclusive, blockHeight) {
+    let node = this.iterator.insertNode(position)
     if (node.priority == null) {
       node.priority = this.generateRandom()
       this.bubbleNodeUp(node)
@@ -54,12 +55,12 @@ export default class LineTopIndex {
     this.blockHeightsById[id] = newBlockHeight
   }
 
-  splice (startRow, oldExtent, newExtent) {
-    let oldEndRow = startRow + oldExtent
-    let newEndRow = startRow + newExtent
+  splice (start, oldExtent, newExtent) {
+    let oldEnd = traverse(start, oldExtent)
+    let newEnd = traverse(start, newExtent)
 
-    let startNode = this.iterator.insertNode(startRow)
-    let endNode = this.iterator.insertNode(oldEndRow)
+    let startNode = this.iterator.insertNode(start)
+    let endNode = this.iterator.insertNode(oldEnd)
 
     startNode.priority = -1
     this.bubbleNodeUp(startNode)
@@ -86,7 +87,7 @@ export default class LineTopIndex {
       })
     }
 
-    endNode.distanceFromLeftAncestor.rows = newEndRow
+    endNode.distanceFromLeftAncestor.point = newEnd
 
     if (startNode.blockIds.size > 0) {
       startNode.priority = this.generateRandom()

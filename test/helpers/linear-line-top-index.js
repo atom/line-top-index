@@ -52,12 +52,19 @@ export default class LinearLineTopIndex {
     return this.blocks
   }
 
+  getLastBlock () {
+    return this.blocks[this.blocks.length - 1]
+  }
+
   splice (start, oldExtent, newExtent) {
+    let oldEnd = traverse(start, oldExtent)
+    let newEnd = traverse(start, newExtent)
+
     this.blocks.forEach(function (block) {
       let comparison = compare(block.position, start)
       if (comparison > 0 || (comparison >= 0 && block.isInclusive)) {
         if (compare(block.position, traverse(start, oldExtent)) >= 0) {
-          block.position = traverse(block.position, traversal(newExtent, oldExtent))
+          block.position = traverse(newEnd, traversal(block.position, oldEnd))
         } else {
           block.position = traverse(start, newExtent)
         }

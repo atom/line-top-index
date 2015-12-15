@@ -1,3 +1,5 @@
+export const ZERO = {row: 0, column: 0}
+
 export function traverse (start, traversal) {
   if (traversal.row === 0) {
     return {

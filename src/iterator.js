@@ -1,5 +1,6 @@
 import Node from './node'
 import {ZERO_POSITION, add as addLogicalPositions} from './logical-position-helpers'
+import {traversal, compare as comparePoints} from './point-helpers'
 
 export default class Iterator {
   constructor (tree) {
@@ -15,28 +16,30 @@ export default class Iterator {
     this.setCurrentNode(this.tree.root)
   }
 
-  insertNode (row) {
+  insertNode (point) {
     this.reset()
 
     if (!this.currentNode) {
-      this.tree.root = new Node(null, {rows: row, pixels: 0})
+      this.tree.root = new Node(null, {point, pixels: 0})
       return this.tree.root
     }
 
     while (true) {
-      if (row < this.currentPosition.rows) {
+      let comparison = comparePoints(point, this.currentPosition.point)
+
+      if (comparison < 0) {
         if (this.currentNode.left) {
           this.descendLeft()
         } else {
-          return this.insertLeftChild(row)
+          return this.insertLeftChild(point)
         }
-      } else if (row === this.currentPosition.rows) {
+      } else if (comparison === 0) {
         return this.currentNode
-      } else { // row > this.currentPosition.rows
+      } else { // comparison > 0
         if (this.currentNode.right) {
           this.descendRight()
         } else {
-          return this.insertRightChild(row)
+          return this.insertRightChild(point)
         }
       }
     }
@@ -48,15 +51,13 @@ export default class Iterator {
     if (!this.currentNode) return 0
 
     while (true) {
-      if (row < this.currentPosition.rows) {
+      if (row < this.currentPosition.point.row) {
         if (this.currentNode.left) {
           this.descendLeft()
         } else {
           return this.leftAncestorPosition.pixels
         }
-      } else if (row === this.currentPosition.rows) {
-        return this.currentPosition.pixels
-      } else { // row > this.currentPosition.rows
+      } else { // row >= this.currentPosition.point.row
         if (this.currentNode.right) {
           this.descendRight()
         } else {
@@ -73,25 +74,25 @@ export default class Iterator {
 
     let blockStart, blockEnd
     while (true) {
-      blockEnd = (this.currentPosition.rows * lineHeight) + this.currentPosition.pixels
+      blockEnd = (this.currentPosition.point.row * lineHeight) + this.currentPosition.pixels
       blockStart = blockEnd - this.currentNode.blockHeight
 
       if (blockStart <= pixelPosition && pixelPosition <= blockEnd) {
-        return this.currentPosition.rows
+        return this.currentPosition.point.row
       } else if (pixelPosition < blockStart) {
         if (this.currentNode.left) {
           this.descendLeft()
         } else {
-          let previousBlockEnd = (this.leftAncestorPosition.rows * lineHeight) + this.leftAncestorPosition.pixels
+          let previousBlockEnd = (this.leftAncestorPosition.point.row * lineHeight) + this.leftAncestorPosition.pixels
           let overshoot = pixelPosition - previousBlockEnd
-          return this.leftAncestorPosition.rows + Math.floor(overshoot / lineHeight)
+          return this.leftAncestorPosition.point.row + Math.floor(overshoot / lineHeight)
         }
       } else { // pixelPosition > blockEnd
         if (this.currentNode.right) {
           this.descendRight()
         } else {
           let overshoot = pixelPosition - blockEnd
-          return this.currentPosition.rows + Math.floor(overshoot / lineHeight)
+          return this.currentPosition.point.row + Math.floor(overshoot / lineHeight)
         }
       }
     }
@@ -121,9 +122,9 @@ export default class Iterator {
     this.leftAncestorPositionStack.push(this.leftAncestorPosition)
   }
 
-  insertLeftChild (row) {
+  insertLeftChild (point) {
     let extent = {
-      rows: row - this.leftAncestorPosition.rows,
+      point: traversal(point, this.leftAncestorPosition.point),
       pixels: 0
     }
     let newNode = new Node(this.currentNode, extent)
@@ -131,9 +132,9 @@ export default class Iterator {
     return newNode
   }
 
-  insertRightChild (row) {
+  insertRightChild (point) {
     let extent = {
-      rows: row - this.currentPosition.rows,
+      point: traversal(point, this.currentPosition.point),
       pixels: 0
     }
     let newNode = new Node(this.currentNode, extent)
