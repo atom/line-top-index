@@ -1,6 +1,6 @@
 import {compare, traverse, traversal} from '../../src/point-helpers'
 
-export default class LineTopIndex {
+export default class LinearLineTopIndex {
   constructor (params = {}) {
     this.blocks = []
     this.maxRow = params.maxRow || 0
