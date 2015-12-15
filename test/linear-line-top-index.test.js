@@ -1,6 +1,6 @@
 import LineTopIndex from './helpers/linear-line-top-index'
 
-describe('LineTopIndex', function () {
+describe('LinearLineTopIndex', function () {
   let lineTopIndex
 
   beforeEach(function () {
@@ -27,9 +27,9 @@ describe('LineTopIndex', function () {
     })
 
     it('takes into account inserted and removed blocks', function () {
-      lineTopIndex.insertBlock(1, {row: 0, column: 0}, 10)
-      lineTopIndex.insertBlock(2, {row: 3, column: 0}, 20)
-      lineTopIndex.insertBlock(3, {row: 5, column: 0}, 20)
+      lineTopIndex.insertBlock(1, {row: 0, column: 0}, true, 10)
+      lineTopIndex.insertBlock(2, {row: 3, column: 0}, true, 20)
+      lineTopIndex.insertBlock(3, {row: 5, column: 0}, true, 20)
 
       assert.equal(lineTopIndex.pixelPositionForRow(0), (0 * 10) + 10)
       assert.equal(lineTopIndex.pixelPositionForRow(1), (1 * 10) + 10)
@@ -52,8 +52,8 @@ describe('LineTopIndex', function () {
     })
 
     it('moves blocks down/up when splicing regions', function () {
-      lineTopIndex.insertBlock(1, {row: 3, column: 0}, 20)
-      lineTopIndex.insertBlock(2, {row: 5, column: 0}, 30)
+      lineTopIndex.insertBlock(1, {row: 3, column: 0}, true, 20)
+      lineTopIndex.insertBlock(2, {row: 5, column: 0}, true, 30)
 
       lineTopIndex.splice({row: 0, column: 0}, {row: 0, column: 0}, {row: 4, column: 0})
 
@@ -86,7 +86,7 @@ describe('LineTopIndex', function () {
       assert.equal(lineTopIndex.pixelPositionForRow(8), (8 * 10) + 20 + 30)
       assert.equal(lineTopIndex.pixelPositionForRow(9), (8 * 10) + 20 + 30)
 
-      lineTopIndex.insertBlock(3, {row: 0, column: 3}, 10)
+      lineTopIndex.insertBlock(3, {row: 0, column: 3}, true, 10)
       lineTopIndex.splice({row: 0, column: 2}, {row: 0, column: 0}, {row: 1, column: 0})
 
       assert.equal(lineTopIndex.pixelPositionForRow(0), (0 * 10))
@@ -112,6 +112,18 @@ describe('LineTopIndex', function () {
       assert.equal(lineTopIndex.pixelPositionForRow(6), (6 * 10) + 10 + 20 + 30)
       assert.equal(lineTopIndex.pixelPositionForRow(7), (6 * 10) + 10 + 20 + 30)
     })
+
+    it('only moves blocks when inserting at their position if they are inclusive', function () {
+      lineTopIndex.insertBlock(1, {row: 10, column: 10}, true, 20)
+      lineTopIndex.insertBlock(2, {row: 10, column: 10}, false, 30)
+
+      assert.equal(lineTopIndex.pixelPositionForRow(10), (10 * 10) + 20 + 30)
+
+      lineTopIndex.splice({row: 10, column: 10}, {row: 0, column: 0}, {row: 1, column: 0})
+
+      assert.equal(lineTopIndex.pixelPositionForRow(10), (10 * 10) + 30)
+      assert.equal(lineTopIndex.pixelPositionForRow(11), (11 * 10) + 20 + 30)
+    })
   })
 
   describe('.prototype.rowForPixelPosition(top)', function () {
@@ -136,9 +148,9 @@ describe('LineTopIndex', function () {
     })
 
     it('takes into account inserted and removed blocks', function () {
-      lineTopIndex.insertBlock(1, {row: 0, column: 0}, 10)
-      lineTopIndex.insertBlock(2, {row: 3, column: 0}, 20)
-      lineTopIndex.insertBlock(3, {row: 5, column: 0}, 20)
+      lineTopIndex.insertBlock(1, {row: 0, column: 0}, true, 10)
+      lineTopIndex.insertBlock(2, {row: 3, column: 0}, true, 20)
+      lineTopIndex.insertBlock(3, {row: 5, column: 0}, true, 20)
 
       assert.equal(lineTopIndex.rowForPixelPosition((0 * 10) + 10), 0)
       assert.equal(lineTopIndex.rowForPixelPosition((1 * 10) + 10), 1)
@@ -170,8 +182,8 @@ describe('LineTopIndex', function () {
     })
 
     it('moves blocks down/up when splicing regions', function () {
-      lineTopIndex.insertBlock(1, {row: 3, column: 0}, 20)
-      lineTopIndex.insertBlock(2, {row: 5, column: 0}, 30)
+      lineTopIndex.insertBlock(1, {row: 3, column: 0}, true, 20)
+      lineTopIndex.insertBlock(2, {row: 5, column: 0}, true, 30)
 
       lineTopIndex.splice({row: 0, column: 0}, {row: 0, column: 0}, {row: 4, column: 0})
 
@@ -204,7 +216,7 @@ describe('LineTopIndex', function () {
       assert.equal(lineTopIndex.rowForPixelPosition((8 * 10) + 20 + 30), 8)
       assert.equal(lineTopIndex.rowForPixelPosition((9 * 10) + 20 + 30), 8)
 
-      lineTopIndex.insertBlock(3, {row: 0, column: 3}, 10)
+      lineTopIndex.insertBlock(3, {row: 0, column: 3}, true, 10)
       lineTopIndex.splice({row: 0, column: 2}, {row: 0, column: 0}, {row: 1, column: 0})
 
       assert.equal(lineTopIndex.rowForPixelPosition((0 * 10) + 0), 0)
@@ -232,6 +244,18 @@ describe('LineTopIndex', function () {
       assert.equal(lineTopIndex.rowForPixelPosition((5 * 10) + 10 + 20 + 30), 5)
       assert.equal(lineTopIndex.rowForPixelPosition((6 * 10) + 10 + 20 + 30), 6)
       assert.equal(lineTopIndex.rowForPixelPosition((7 * 10) + 10 + 20 + 30), 6)
+    })
+
+    it('only moves blocks when inserting at their position if they are inclusive', function () {
+      lineTopIndex.insertBlock(1, {row: 10, column: 10}, true, 20)
+      lineTopIndex.insertBlock(2, {row: 10, column: 10}, false, 30)
+
+      assert.equal(lineTopIndex.rowForPixelPosition((10 * 10) + 20 + 30), 10)
+
+      lineTopIndex.splice({row: 10, column: 10}, {row: 0, column: 0}, {row: 1, column: 0})
+
+      assert.equal(lineTopIndex.rowForPixelPosition((10 * 10) + 30), 10)
+      assert.equal(lineTopIndex.rowForPixelPosition((11 * 10) + 20 + 30), 11)
     })
   })
 })

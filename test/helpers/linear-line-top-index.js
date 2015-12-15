@@ -15,9 +15,16 @@ export default class LineTopIndex {
     return this.maxRow
   }
 
-  insertBlock (id, position, height) {
-    this.blocks.push({id, position, height})
-    this.blocks.sort((a, b) => compare(a.position, b.position))
+  insertBlock (id, position, isInclusive, height) {
+    this.blocks.push({id, position, isInclusive, height})
+    this.sortBlocks()
+  }
+
+  setBlockInclusive (id, isInclusive) {
+    let block = this.blocks.find((block) => block.id === id)
+    if (block) {
+      block.isInclusive = isInclusive
+    }
   }
 
   resizeBlock (id, height) {
@@ -31,7 +38,7 @@ export default class LineTopIndex {
     let block = this.blocks.find((block) => block.id === id)
     if (block) {
       block.position = newPosition
-      this.blocks.sort((a, b) => compare(a.position, b.position))
+      this.sortBlocks()
     }
   }
 
@@ -42,13 +49,18 @@ export default class LineTopIndex {
     }
   }
 
+  sortBlocks () {
+    this.blocks.sort((a, b) => compare(a.position, b.position))
+  }
+
   allBlocks () {
     return this.blocks
   }
 
   splice (start, oldExtent, newExtent) {
     this.blocks.forEach(function (block) {
-      if (compare(block.position, start) >= 0) {
+      let comparison = compare(block.position, start)
+      if (comparison > 0 || (comparison >= 0 && block.isInclusive)) {
         if (compare(block.position, traverse(start, oldExtent)) >= 0) {
           block.position = traverse(block.position, traversal(newExtent, oldExtent))
         } else {
@@ -56,6 +68,7 @@ export default class LineTopIndex {
         }
       }
     })
+    this.sortBlocks()
 
     this.maxRow = this.maxRow + traversal(newExtent, oldExtent).row
   }
