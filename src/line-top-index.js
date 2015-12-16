@@ -33,6 +33,14 @@ export default class LineTopIndex {
     if (inclusive) this.inclusiveBlockIds.add(id)
   }
 
+  setBlockInclusive (id, inclusive) {
+    if (inclusive) {
+      this.inclusiveBlockIds.add(id)
+    } else {
+      this.inclusiveBlockIds.delete(id)
+    }
+  }
+
   removeBlock (id) {
     let node = this.blockEndNodesById[id]
     let blockHeight = this.blockHeightsById[id]
