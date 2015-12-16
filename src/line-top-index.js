@@ -11,6 +11,7 @@ export default class LineTopIndex {
     this.iterator = this.buildIterator()
     this.blockEndNodesById = {}
     this.blockHeightsById = {}
+    this.inclusiveBlockIds = new Set
   }
 
   buildIterator () {
@@ -29,6 +30,7 @@ export default class LineTopIndex {
     node.blockIds.add(id)
     this.blockEndNodesById[id] = node
     this.blockHeightsById[id] = blockHeight
+    if (inclusive) this.inclusiveBlockIds.add(id)
   }
 
   removeBlock (id) {
@@ -70,9 +72,11 @@ export default class LineTopIndex {
     if (startNode !== endNode) {
       let blockIdsToMove = new Set
 
-      startNode.blockIds.forEach(function (id) {
-        startNode.blockIds.delete(id)
-        blockIdsToMove.add(id)
+      startNode.blockIds.forEach((id) => {
+        if (this.inclusiveBlockIds.has(id)) {
+          startNode.blockIds.delete(id)
+          blockIdsToMove.add(id)
+        }
       })
 
       if (startNode.right) {

@@ -59,7 +59,7 @@ function performInsertion (random, actualIndex, referenceIndex) {
   let start = randomPoint(random, 100, 100)
   let height = random(100 + 1)
   let id = idCounter++
-  let inclusive = true// Boolean(random(2))
+  let inclusive = Boolean(random(2))
 
   // document.write(`<div>performInsertion(${id}, ${formatPoint(start)}, ${height})</div>`)
 
