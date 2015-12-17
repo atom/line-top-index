@@ -25,8 +25,10 @@ describe('LineTopIndex', () => {
           performInsertion(random, actualIndex, referenceIndex)
         } else if (k < 5) {
           performRemoval(random, actualIndex, referenceIndex)
-        } else if (k < 7) {
+        } else if (k < 6) {
           performResize(random, actualIndex, referenceIndex)
+        } else if (k < 7) {
+          performMove(random, actualIndex, referenceIndex)
         } else {
           performSplice(random, actualIndex, referenceIndex)
         }
@@ -76,6 +78,18 @@ function performRemoval (random, actualIndex, referenceIndex) {
 
   referenceIndex.removeBlock(id)
   actualIndex.removeBlock(id)
+}
+
+function performMove (random, actualIndex, referenceIndex) {
+  if (referenceIndex.allBlocks().length === 0) return
+
+  let id = getRandomBlockId(random, referenceIndex)
+  let newPosition = randomPoint(random, 100, 100)
+
+  // document.write(`<div>performMove(${id}, ${formatPoint(newPosition)})</div>`)
+
+  referenceIndex.moveBlock(id, newPosition)
+  actualIndex.moveBlock(id, newPosition)
 }
 
 function performResize (random, actualIndex, referenceIndex) {

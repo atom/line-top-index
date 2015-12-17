@@ -65,6 +65,13 @@ export default class LineTopIndex {
     this.blockHeightsById[id] = newBlockHeight
   }
 
+  moveBlock (id, newPosition) {
+    let inclusive = this.inclusiveBlockIds.has(id)
+    let blockHeight = this.blockHeightsById[id]
+    this.removeBlock(id)
+    this.insertBlock(id, newPosition, inclusive, blockHeight)
+  }
+
   splice (start, oldExtent, newExtent) {
     let oldEnd = traverse(start, oldExtent)
     let newEnd = traverse(start, newExtent)
