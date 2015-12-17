@@ -1,7 +1,7 @@
 import Random from 'random-seed'
 import Iterator from './iterator'
 import {add as addLogicalPositions, subtract as subtractLogicalPositions} from './logical-position-helpers'
-import {traverse} from './point-helpers'
+import {isZero, traverse, compare as comparePoints} from './point-helpers'
 
 export default class LineTopIndex {
   constructor (params = {}) {
@@ -66,33 +66,37 @@ export default class LineTopIndex {
   }
 
   splice (start, oldExtent, newExtent) {
+    if (isZero(oldExtent) && isZero(newExtent)) return
+
     let oldEnd = traverse(start, oldExtent)
     let newEnd = traverse(start, newExtent)
 
-    let startNode = this.iterator.insertNode(start)
-    let endNode = this.iterator.insertNode(oldEnd)
+    let isInsertion = isZero(oldExtent)
+    let startNode = this.iterator.insertNode(start, false)
+    let endNode = this.iterator.insertNode(oldEnd, isInsertion)
 
     startNode.priority = -1
     this.bubbleNodeUp(startNode)
     endNode.priority = -2
     this.bubbleNodeUp(endNode)
 
-    if (startNode !== endNode) {
+    startNode.blockIds.forEach((id) => {
+      if (!this.inclusiveBlockIds.has(id)) return
+
+      startNode.blockIds.delete(id)
+      startNode.blockHeight -= this.blockHeightsById[id]
+      startNode.distanceFromLeftAncestor.pixels -= this.blockHeightsById[id]
+
+      endNode.blockIds.add(id)
+      endNode.blockHeight += this.blockHeightsById[id]
+      this.blockEndNodesById[id] = endNode
+    })
+
+    if (startNode.right) {
       let blockIdsToMove = new Set
-
-      startNode.blockIds.forEach((id) => {
-        if (this.inclusiveBlockIds.has(id)) {
-          startNode.blockIds.delete(id)
-          blockIdsToMove.add(id)
-        }
-      })
-
-      if (startNode.right) {
-        this.collectBlockIdsForSubtree(startNode.right, blockIdsToMove)
-        startNode.right = null
-      }
-
-      blockIdsToMove.forEach(id => {
+      this.collectBlockIdsForSubtree(startNode.right, blockIdsToMove)
+      startNode.right = null
+      blockIdsToMove.forEach((id) => {
         endNode.blockIds.add(id)
         endNode.blockHeight += this.blockHeightsById[id]
         this.blockEndNodesById[id] = endNode
@@ -101,20 +105,27 @@ export default class LineTopIndex {
 
     endNode.distanceFromLeftAncestor.point = newEnd
 
+    if (comparePoints(startNode.distanceFromLeftAncestor.point, endNode.distanceFromLeftAncestor.point) === 0) {
+      endNode.blockIds.forEach((id) => {
+        startNode.blockIds.add(id)
+        startNode.blockHeight += this.blockHeightsById[id]
+        startNode.distanceFromLeftAncestor.pixels += this.blockHeightsById[id]
+        this.blockEndNodesById[id] = startNode
+      })
+
+      this.deleteNode(endNode)
+    } else if (endNode.blockIds.size > 0) {
+      endNode.priority = this.generateRandom()
+      this.bubbleNodeDown(endNode)
+    } else {
+      this.deleteNode(endNode)
+    }
+
     if (startNode.blockIds.size > 0) {
       startNode.priority = this.generateRandom()
       this.bubbleNodeDown(startNode)
     } else {
       this.deleteNode(startNode)
-    }
-
-    if (endNode !== startNode) {
-      if (endNode.blockIds.size > 0) {
-        endNode.priority = this.generateRandom()
-        this.bubbleNodeDown(endNode)
-      } else {
-        this.deleteNode(endNode)
-      }
     }
   }
 
