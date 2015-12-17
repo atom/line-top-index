@@ -66,8 +66,6 @@ export default class LineTopIndex {
   }
 
   splice (start, oldExtent, newExtent) {
-    if (isZero(oldExtent) && isZero(newExtent)) return
-
     let oldEnd = traverse(start, oldExtent)
     let newEnd = traverse(start, newExtent)
 
@@ -95,12 +93,12 @@ export default class LineTopIndex {
     if (startNode.right) {
       let blockIdsToMove = new Set
       this.collectBlockIdsForSubtree(startNode.right, blockIdsToMove)
-      startNode.right = null
       blockIdsToMove.forEach((id) => {
         endNode.blockIds.add(id)
         endNode.blockHeight += this.blockHeightsById[id]
         this.blockEndNodesById[id] = endNode
       })
+      startNode.right = null
     }
 
     endNode.distanceFromLeftAncestor.point = newEnd

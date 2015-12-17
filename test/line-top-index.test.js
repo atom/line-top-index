@@ -9,7 +9,7 @@ describe('LineTopIndex', () => {
   it('determines line heights correctly after randomized insertions, removals, and splices', function () {
     this.timeout(Infinity)
 
-    for (let i = 0; i < 1000; i++) {
+    for (let i = 0; i < 7000; i++) {
       let seed = Date.now()
       let random = new Random(seed)
 
@@ -19,7 +19,7 @@ describe('LineTopIndex', () => {
       let actualIndex = new LineTopIndex({seed, defaultLineHeight, maxRow})
       idCounter = 1
 
-      for (let j = 0; j < 4; j++) {
+      for (let j = 0; j < 900; j++) {
         let k = random(10)
         if (k < 3) {
           performInsertion(random, actualIndex, referenceIndex)
