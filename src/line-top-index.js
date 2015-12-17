@@ -70,8 +70,8 @@ export default class LineTopIndex {
     let newEnd = traverse(start, newExtent)
 
     let isInsertion = isZero(oldExtent)
-    let startNode = this.iterator.insertNode(start, false)
-    let endNode = this.iterator.insertNode(oldEnd, isInsertion)
+    let startNode = this.iterator.insertNode(start)
+    let endNode = this.iterator.insertNode(oldEnd, !isInsertion)
 
     startNode.priority = -1
     this.bubbleNodeUp(startNode)
