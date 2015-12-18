@@ -56,21 +56,27 @@ export default class LinearLineTopIndex {
     return this.blocks[this.blocks.length - 1]
   }
 
-  splice (start, oldExtent, newExtent) {
+  splice (start, oldExtent, newExtent, invalidateOldRange) {
     let oldEnd = traverse(start, oldExtent)
     let newEnd = traverse(start, newExtent)
 
-    this.blocks.forEach(function (block) {
+    let invalidatedBlocks = new Set
+
+    this.blocks.forEach(block => {
       let comparison = compare(block.position, start)
       if (comparison > 0 || (comparison >= 0 && block.isInclusive)) {
         if (compare(block.position, traverse(start, oldExtent)) >= 0) {
           block.position = traverse(newEnd, traversal(block.position, oldEnd))
         } else {
           block.position = traverse(start, newExtent)
+          if (invalidateOldRange) invalidatedBlocks.add(block.id)
         }
       }
     })
+
     this.sortBlocks()
+    invalidatedBlocks.forEach(this.removeBlock.bind(this))
+    return invalidatedBlocks
   }
 
   pixelPositionForRow (row) {
