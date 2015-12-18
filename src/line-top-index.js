@@ -94,7 +94,7 @@ export default class LineTopIndex {
     endNode.priority = -2
     this.bubbleNodeUp(endNode)
 
-    startNode.blockIds.forEach((id) => {
+    startNode.blockIds.forEach(id => {
       if (!this.inclusiveBlockIds.has(id)) return
 
       startNode.blockIds.delete(id)
@@ -109,7 +109,7 @@ export default class LineTopIndex {
     })
 
     if (startNode.right) {
-      this.blockIdsForSubtree(startNode.right).forEach((id) => {
+      this.blockIdsForSubtree(startNode.right).forEach(id => {
         if (invalidateOldRange) {
           invalidatedBlocks.add(id)
         } else {
@@ -135,7 +135,7 @@ export default class LineTopIndex {
     endNode.distanceFromLeftAncestor.point = newEnd
 
     if (comparePoints(startNode.distanceFromLeftAncestor.point, endNode.distanceFromLeftAncestor.point) === 0) {
-      endNode.blockIds.forEach((id) => {
+      endNode.blockIds.forEach(id => {
         startNode.blockIds.add(id)
         startNode.blockHeight += this.blockHeightsById[id]
         startNode.distanceFromLeftAncestor.pixels += this.blockHeightsById[id]
