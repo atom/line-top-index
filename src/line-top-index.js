@@ -5,13 +5,17 @@ import {isZero, traverse, compare as comparePoints} from './point-helpers'
 
 export default class LineTopIndex {
   constructor (params = {}) {
-    this.defaultLineHeight = params.defaultLineHeight || 0
+    this.setDefaultLineHeight(params.defaultLineHeight || 0)
     this.randomGenerator = new Random(params.seed || Date.now())
     this.root = null
     this.iterator = this.buildIterator()
     this.blockEndNodesById = {}
     this.blockHeightsById = {}
     this.inclusiveBlockIds = new Set
+  }
+
+  setDefaultLineHeight (lineHeight) {
+    this.defaultLineHeight = lineHeight
   }
 
   buildIterator () {
