@@ -76,13 +76,18 @@ export default class LineTopIndex {
     this.insertBlock(id, newPosition, inclusive, blockHeight)
   }
 
-  splice (start, oldExtent, newExtent) {
+  splice (start, oldExtent, newExtent, invalidateOldRange) {
+    if (isZero(oldExtent) && isZero(newExtent)) return
+
     let oldEnd = traverse(start, oldExtent)
     let newEnd = traverse(start, newExtent)
 
     let isInsertion = isZero(oldExtent)
     let startNode = this.iterator.insertNode(start)
     let endNode = this.iterator.insertNode(oldEnd, !isInsertion)
+
+    let invalidatedBlocks = new Set
+    let blocksIdsToMove = new Set
 
     startNode.priority = -1
     this.bubbleNodeUp(startNode)
@@ -96,21 +101,36 @@ export default class LineTopIndex {
       startNode.blockHeight -= this.blockHeightsById[id]
       startNode.distanceFromLeftAncestor.pixels -= this.blockHeightsById[id]
 
+      if (!isInsertion && invalidateOldRange) {
+        invalidatedBlocks.add(id)
+      } else {
+        blocksIdsToMove.add(id)
+      }
+    })
+
+    if (startNode.right) {
+      this.blockIdsForSubtree(startNode.right).forEach((id) => {
+        if (invalidateOldRange) {
+          invalidatedBlocks.add(id)
+        } else {
+          blocksIdsToMove.add(id)
+        }
+      })
+
+      startNode.right = null
+    }
+
+    invalidatedBlocks.forEach(id => {
+      endNode.distanceFromLeftAncestor.pixels -= this.blockHeightsById[id]
+      delete this.blockEndNodesById[id]
+      delete this.blockHeightsById[id]
+    })
+
+    blocksIdsToMove.forEach(id => {
       endNode.blockIds.add(id)
       endNode.blockHeight += this.blockHeightsById[id]
       this.blockEndNodesById[id] = endNode
     })
-
-    if (startNode.right) {
-      let blockIdsToMove = new Set
-      this.collectBlockIdsForSubtree(startNode.right, blockIdsToMove)
-      blockIdsToMove.forEach((id) => {
-        endNode.blockIds.add(id)
-        endNode.blockHeight += this.blockHeightsById[id]
-        this.blockEndNodesById[id] = endNode
-      })
-      startNode.right = null
-    }
 
     endNode.distanceFromLeftAncestor.point = newEnd
 
@@ -136,6 +156,8 @@ export default class LineTopIndex {
     } else {
       this.deleteNode(startNode)
     }
+
+    return invalidatedBlocks
   }
 
   pixelPositionForRow (row) {
@@ -246,12 +268,14 @@ export default class LineTopIndex {
     }
   }
 
-  collectBlockIdsForSubtree (node, blockIds) {
+  blockIdsForSubtree (node, blockIds = new Set()) {
     node.blockIds.forEach(function (id) {
       blockIds.add(id)
     })
-    if (node.left) this.collectBlockIdsForSubtree(node.left, blockIds)
-    if (node.right) this.collectBlockIdsForSubtree(node.right, blockIds)
+    if (node.left) this.blockIdsForSubtree(node.left, blockIds)
+    if (node.right) this.blockIdsForSubtree(node.right, blockIds)
+
+    return blockIds
   }
 
   generateRandom () {
