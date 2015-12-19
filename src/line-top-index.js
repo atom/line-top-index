@@ -76,8 +76,8 @@ export default class LineTopIndex {
     this.insertBlock(id, newPosition, inclusive, blockHeight)
   }
 
-  splice (start, oldExtent, newExtent, invalidateOldRange) {
-    if (isZero(oldExtent) && isZero(newExtent)) return
+  splice (start, oldExtent, newExtent) {
+    if (isZero(oldExtent) && isZero(newExtent)) return new Set()
 
     let oldEnd = traverse(start, oldExtent)
     let newEnd = traverse(start, newExtent)
@@ -86,8 +86,8 @@ export default class LineTopIndex {
     let startNode = this.iterator.insertNode(start)
     let endNode = this.iterator.insertNode(oldEnd, !isInsertion)
 
-    let invalidatedBlocks = new Set
-    let blocksIdsToMove = new Set
+    let touchedBlocks = new Set()
+    let blocksIdsToMove = new Set()
 
     startNode.priority = -1
     this.bubbleNodeUp(startNode)
@@ -101,30 +101,19 @@ export default class LineTopIndex {
       startNode.blockHeight -= this.blockHeightsById[id]
       startNode.distanceFromLeftAncestor.pixels -= this.blockHeightsById[id]
 
-      if (!isInsertion && invalidateOldRange) {
-        invalidatedBlocks.add(id)
-      } else {
-        blocksIdsToMove.add(id)
-      }
+      if (!isInsertion) touchedBlocks.add(id)
+
+      blocksIdsToMove.add(id)
     })
 
     if (startNode.right) {
       this.blockIdsForSubtree(startNode.right).forEach(id => {
-        if (invalidateOldRange) {
-          invalidatedBlocks.add(id)
-        } else {
-          blocksIdsToMove.add(id)
-        }
+        touchedBlocks.add(id)
+        blocksIdsToMove.add(id)
       })
 
       startNode.right = null
     }
-
-    invalidatedBlocks.forEach(id => {
-      endNode.distanceFromLeftAncestor.pixels -= this.blockHeightsById[id]
-      delete this.blockEndNodesById[id]
-      delete this.blockHeightsById[id]
-    })
 
     blocksIdsToMove.forEach(id => {
       endNode.blockIds.add(id)
@@ -157,7 +146,7 @@ export default class LineTopIndex {
       this.deleteNode(startNode)
     }
 
-    return invalidatedBlocks
+    return touchedBlocks
   }
 
   pixelPositionForRow (row) {

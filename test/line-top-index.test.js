@@ -110,12 +110,14 @@ function performSplice (random, actualIndex, referenceIndex) {
   while (random(2) > 0) oldExtent = traverse(oldExtent, randomPoint(random, 5, 5))
   let newExtent = ZERO_POINT
   while (random(2) > 0) newExtent = traverse(newExtent, randomPoint(random, 5, 5))
-  let invalidateOldRange = Boolean(random(2))
 
   // document.write(`<div>performSplice(${formatPoint(start)}, ${formatPoint(oldExtent)}, ${formatPoint(newExtent)})</div>`)
 
-  referenceIndex.splice(start, oldExtent, newExtent, invalidateOldRange)
-  actualIndex.splice(start, oldExtent, newExtent, invalidateOldRange)
+  let referenceTouchedBlocks = referenceIndex.splice(start, oldExtent, newExtent)
+  let actualTouchedBlocks = actualIndex.splice(start, oldExtent, newExtent)
+
+  referenceTouchedBlocks.forEach(id => assert.equal(actualTouchedBlocks.has(id), true))
+  actualTouchedBlocks.forEach(id => assert.equal(referenceTouchedBlocks.has(id), true))
 }
 
 function randomPoint(random, maxRow, maxColumn) {

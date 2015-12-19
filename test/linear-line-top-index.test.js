@@ -7,26 +7,22 @@ describe('LinearLineTopIndex', function () {
     lineTopIndex = new LineTopIndex({defaultLineHeight: 10})
   })
 
-  describe('.prototype.splice(start, oldExtent, newExtent, invalidateOldRange)', function () {
-    it('returns a set of invalidated blocks within the old range', function () {
+  describe('.prototype.splice(start, oldExtent, newExtent)', function () {
+    it('returns a set of touched blocks within the old range', function () {
       lineTopIndex.insertBlock(1, {row: 0, column: 0}, true, 10)
       lineTopIndex.insertBlock(2, {row: 0, column: 3}, true, 20)
       lineTopIndex.insertBlock(3, {row: 0, column: 7}, true, 30)
       lineTopIndex.insertBlock(4, {row: 2, column: 3}, true, 40)
       lineTopIndex.insertBlock(5, {row: 2, column: 5}, true, 50)
 
-      let invalidatedBlocks =
-        lineTopIndex.splice({row: 0, column: 1}, {row: 2, column: 4}, {row: 0, column: 0}, true)
+      let touchedBlocks =
+        lineTopIndex.splice({row: 0, column: 1}, {row: 2, column: 4}, {row: 0, column: 0})
 
-      assert.equal(invalidatedBlocks.has(1), false)
-      assert.equal(invalidatedBlocks.has(2), true)
-      assert.equal(invalidatedBlocks.has(3), true)
-      assert.equal(invalidatedBlocks.has(4), true)
-      assert.equal(invalidatedBlocks.has(5), false)
-
-      assert.equal(lineTopIndex.pixelPositionForRow(0), 0 * 10 + 10 + 50)
-      assert.equal(lineTopIndex.pixelPositionForRow(1), 1 * 10 + 10 + 50)
-      assert.equal(lineTopIndex.pixelPositionForRow(2), 2 * 10 + 10 + 50)
+      assert.equal(touchedBlocks.has(1), false)
+      assert.equal(touchedBlocks.has(2), true)
+      assert.equal(touchedBlocks.has(3), true)
+      assert.equal(touchedBlocks.has(4), true)
+      assert.equal(touchedBlocks.has(5), false)
     })
   })
 
