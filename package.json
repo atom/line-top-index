@@ -1,6 +1,6 @@
 {
   "name": "line-top-index",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A data structure to efficiently represent the top position of lines in the presence of fixed-height blocks.",
   "main": "dist/line-top-index.js",
   "scripts": {
