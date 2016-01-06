@@ -10,8 +10,8 @@ export default class LinearLineTopIndex {
     this.defaultLineHeight = lineHeight
   }
 
-  insertBlock (id, position, isInclusive, height) {
-    this.blocks.push({id, position, isInclusive, height})
+  insertBlock (id, position, isInclusive, height, followsPosition=false) {
+    this.blocks.push({id, position, isInclusive, height, followsPosition})
     this.sortBlocks()
   }
 
@@ -78,9 +78,13 @@ export default class LinearLineTopIndex {
     return touchedBlocks
   }
 
+  blocksPrecedingRow (row) {
+    return this.blocks.filter(b => b.position.row < row || (b.position.row == row && !b.followsPosition))
+  }
+
   pixelPositionForRow (row) {
     let linesHeight = row * this.defaultLineHeight
-    let blocksHeight = this.blocks.filter((block) => block.position.row <= row).reduce((a, b) => a + b.height, 0)
+    let blocksHeight = this.blocksPrecedingRow(row).reduce((a, b) => a + b.height, 0)
     return linesHeight + blocksHeight
   }
 
