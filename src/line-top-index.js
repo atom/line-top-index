@@ -12,6 +12,7 @@ export default class LineTopIndex {
     this.blockEndNodesById = {}
     this.blockHeightsById = {}
     this.inclusiveBlockIds = new Set
+    this.followingBlockIds = new Set
   }
 
   setDefaultLineHeight (lineHeight) {
@@ -22,19 +23,20 @@ export default class LineTopIndex {
     return new Iterator(this)
   }
 
-  insertBlock (id, position, inclusive, blockHeight) {
+  insertBlock (id, position, inclusive, blockHeight, followsPosition) {
     let node = this.iterator.insertNode(position)
     if (node.priority == null) {
       node.priority = this.generateRandom()
       this.bubbleNodeUp(node)
     }
 
-    this.adjustNodeBlockHeight(node, +blockHeight)
+    this.adjustNodeBlockHeight(node, +blockHeight, followsPosition)
 
     node.blockIds.add(id)
     this.blockEndNodesById[id] = node
     this.blockHeightsById[id] = blockHeight
     if (inclusive) this.inclusiveBlockIds.add(id)
+    if (followsPosition) this.followingBlockIds.add(id)
   }
 
   setBlockInclusive (id, inclusive) {
@@ -48,8 +50,9 @@ export default class LineTopIndex {
   removeBlock (id) {
     let node = this.blockEndNodesById[id]
     let blockHeight = this.blockHeightsById[id]
+    let followsPosition = this.followingBlockIds.has(id)
 
-    this.adjustNodeBlockHeight(node, -blockHeight)
+    this.adjustNodeBlockHeight(node, -blockHeight, followsPosition)
     node.blockIds.delete(id)
     if (node.blockIds.size === 0) {
       this.deleteNode(node)
@@ -57,14 +60,17 @@ export default class LineTopIndex {
 
     delete this.blockEndNodesById[id]
     delete this.blockHeightsById[id]
+    this.followingBlockIds.delete(id)
+    this.inclusiveBlockIds.delete(id)
   }
 
   resizeBlock (id, newBlockHeight) {
     let node = this.blockEndNodesById[id]
     let blockHeight = this.blockHeightsById[id]
     let delta = newBlockHeight - blockHeight
+    let followsPosition = this.followingBlockIds.has(id)
 
-    this.adjustNodeBlockHeight(node, delta)
+    this.adjustNodeBlockHeight(node, delta, followsPosition)
 
     this.blockHeightsById[id] = newBlockHeight
   }
@@ -72,8 +78,9 @@ export default class LineTopIndex {
   moveBlock (id, newPosition) {
     let inclusive = this.inclusiveBlockIds.has(id)
     let blockHeight = this.blockHeightsById[id]
+    let followsPosition = this.followingBlockIds.has(id)
     this.removeBlock(id)
-    this.insertBlock(id, newPosition, inclusive, blockHeight)
+    this.insertBlock(id, newPosition, inclusive, blockHeight, followsPosition)
   }
 
   splice (start, oldExtent, newExtent) {
@@ -100,6 +107,7 @@ export default class LineTopIndex {
       startNode.blockIds.delete(id)
       startNode.blockHeight -= this.blockHeightsById[id]
       startNode.distanceFromLeftAncestor.pixels -= this.blockHeightsById[id]
+      if (this.followingBlockIds.has(id)) startNode.followingBlockHeight -= this.blockHeightsById[id]
 
       if (!isInsertion) touchedBlocks.add(id)
 
@@ -118,6 +126,7 @@ export default class LineTopIndex {
     blocksIdsToMove.forEach(id => {
       endNode.blockIds.add(id)
       endNode.blockHeight += this.blockHeightsById[id]
+      if (this.followingBlockIds.has(id)) endNode.followingBlockHeight += this.blockHeightsById[id]
       this.blockEndNodesById[id] = endNode
     })
 
@@ -128,6 +137,7 @@ export default class LineTopIndex {
         startNode.blockIds.add(id)
         startNode.blockHeight += this.blockHeightsById[id]
         startNode.distanceFromLeftAncestor.pixels += this.blockHeightsById[id]
+        if (this.followingBlockIds.has(id)) startNode.followingBlockHeight += this.blockHeightsById[id]
         this.blockEndNodesById[id] = startNode
       })
 
@@ -246,7 +256,8 @@ export default class LineTopIndex {
     root.distanceFromLeftAncestor = subtractLogicalPositions(root.distanceFromLeftAncestor, pivot.distanceFromLeftAncestor)
   }
 
-  adjustNodeBlockHeight (node, delta) {
+  adjustNodeBlockHeight (node, delta, followsPosition) {
+    if (followsPosition) node.followingBlockHeight += delta
     node.blockHeight += delta
     node.distanceFromLeftAncestor.pixels += delta
     while (node.parent) {

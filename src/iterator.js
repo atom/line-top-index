@@ -57,7 +57,9 @@ export default class Iterator {
         } else {
           return this.leftAncestorPosition.pixels
         }
-      } else { // row >= this.currentPosition.point.row
+      } else if (row === this.currentPosition.point.row) {
+        return this.currentPosition.pixels - this.currentNode.followingBlockHeight
+      } else { // row > this.currentPosition.point.row
         if (this.currentNode.right) {
           this.descendRight()
         } else {

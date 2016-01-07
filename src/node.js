@@ -9,6 +9,7 @@ export default class Node {
     this.id = ++idCounter
     this.priority = null
     this.blockHeight = 0
+    this.followingBlockHeight = 0
     this.blockIds = new Set
   }
 }

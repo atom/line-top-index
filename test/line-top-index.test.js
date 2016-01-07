@@ -52,6 +52,7 @@ function verifyIndex (random, actualIndex, referenceIndex, message) {
     let nextRowPixelPosition = referenceIndex.pixelPositionForRow(row + 1)
     let betweenRowsPixelPosition = random.intBetween(rowPixelPosition, nextRowPixelPosition)
 
+    // console.log(row);
     assert.equal(actualIndex.pixelPositionForRow(row), rowPixelPosition, message)
     assert.equal(actualIndex.rowForPixelPosition(betweenRowsPixelPosition), referenceIndex.rowForPixelPosition(betweenRowsPixelPosition), message)
   }
@@ -62,11 +63,12 @@ function performInsertion (random, actualIndex, referenceIndex) {
   let height = random(100 + 1)
   let id = idCounter++
   let inclusive = Boolean(random(2))
+  let followsPosition = Boolean(random(2))
 
-  // document.write(`<div>performInsertion(${id}, ${formatPoint(start)}, ${height})</div>`)
+  // document.write(`<div>performInsertion(${id}, ${formatPoint(start)}, ${height}, ${followsPosition})</div>`)
 
-  referenceIndex.insertBlock(id, start, inclusive, height)
-  actualIndex.insertBlock(id, start, inclusive, height)
+  referenceIndex.insertBlock(id, start, inclusive, height, followsPosition)
+  actualIndex.insertBlock(id, start, inclusive, height, followsPosition)
 }
 
 function performRemoval (random, actualIndex, referenceIndex) {
@@ -121,7 +123,7 @@ function performSplice (random, actualIndex, referenceIndex) {
 }
 
 function randomPoint(random, maxRow, maxColumn) {
-  return {row: random(maxRow), column: random(maxColumn)}
+  return {row: random(maxRow), column: 0}
 }
 
 function getRandomBlockId (random, referenceIndex) {
