@@ -1,7 +1,6 @@
 import Random from 'random-seed'
 import Iterator from './iterator'
 import {add as addLogicalPositions, subtract as subtractLogicalPositions} from './logical-position-helpers'
-import {isZero, traverse, compare as comparePoints} from './point-helpers'
 
 export default class LineTopIndex {
   constructor (params = {}) {
@@ -11,7 +10,6 @@ export default class LineTopIndex {
     this.iterator = this.buildIterator()
     this.blockEndNodesById = {}
     this.blockHeightsById = {}
-    this.inclusiveBlockIds = new Set
     this.followingBlockIds = new Set
   }
 
@@ -23,7 +21,7 @@ export default class LineTopIndex {
     return new Iterator(this)
   }
 
-  insertBlock (id, position, inclusive, blockHeight, followsPosition) {
+  insertBlock (id, position, blockHeight, followsPosition) {
     let node = this.iterator.insertNode(position)
     if (node.priority == null) {
       node.priority = this.generateRandom()
@@ -35,16 +33,7 @@ export default class LineTopIndex {
     node.blockIds.add(id)
     this.blockEndNodesById[id] = node
     this.blockHeightsById[id] = blockHeight
-    if (inclusive) this.inclusiveBlockIds.add(id)
     if (followsPosition) this.followingBlockIds.add(id)
-  }
-
-  setBlockInclusive (id, inclusive) {
-    if (inclusive) {
-      this.inclusiveBlockIds.add(id)
-    } else {
-      this.inclusiveBlockIds.delete(id)
-    }
   }
 
   removeBlock (id) {
@@ -61,7 +50,6 @@ export default class LineTopIndex {
     delete this.blockEndNodesById[id]
     delete this.blockHeightsById[id]
     this.followingBlockIds.delete(id)
-    this.inclusiveBlockIds.delete(id)
   }
 
   resizeBlock (id, newBlockHeight) {
@@ -76,20 +64,19 @@ export default class LineTopIndex {
   }
 
   moveBlock (id, newPosition) {
-    let inclusive = this.inclusiveBlockIds.has(id)
     let blockHeight = this.blockHeightsById[id]
     let followsPosition = this.followingBlockIds.has(id)
     this.removeBlock(id)
-    this.insertBlock(id, newPosition, inclusive, blockHeight, followsPosition)
+    this.insertBlock(id, newPosition, blockHeight, followsPosition)
   }
 
   splice (start, oldExtent, newExtent) {
-    if (isZero(oldExtent) && isZero(newExtent)) return new Set()
+    if (oldExtent === 0 && newExtent === 0) return new Set()
 
-    let oldEnd = traverse(start, oldExtent)
-    let newEnd = traverse(start, newExtent)
+    let oldEnd = start + oldExtent
+    let newEnd = start + newExtent
 
-    let isInsertion = isZero(oldExtent)
+    let isInsertion = oldExtent === 0
     let startNode = this.iterator.insertNode(start)
     let endNode = this.iterator.insertNode(oldEnd, !isInsertion)
 
@@ -102,8 +89,6 @@ export default class LineTopIndex {
     this.bubbleNodeUp(endNode)
 
     startNode.blockIds.forEach(id => {
-      if (!this.inclusiveBlockIds.has(id)) return
-
       startNode.blockIds.delete(id)
       startNode.blockHeight -= this.blockHeightsById[id]
       startNode.distanceFromLeftAncestor.pixels -= this.blockHeightsById[id]
@@ -130,9 +115,9 @@ export default class LineTopIndex {
       this.blockEndNodesById[id] = endNode
     })
 
-    endNode.distanceFromLeftAncestor.point = newEnd
+    endNode.distanceFromLeftAncestor.row = newEnd
 
-    if (comparePoints(startNode.distanceFromLeftAncestor.point, endNode.distanceFromLeftAncestor.point) === 0) {
+    if (startNode.distanceFromLeftAncestor.row === endNode.distanceFromLeftAncestor.row) {
       endNode.blockIds.forEach(id => {
         startNode.blockIds.add(id)
         startNode.blockHeight += this.blockHeightsById[id]

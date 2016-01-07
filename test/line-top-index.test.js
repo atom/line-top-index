@@ -1,7 +1,6 @@
 import Random from 'random-seed'
 import LinearLineTopIndex from './helpers/linear-line-top-index'
 import LineTopIndex from '../src/line-top-index'
-import {traverse, format as formatPoint, ZERO as ZERO_POINT} from '../src/point-helpers'
 
 let idCounter
 
@@ -47,7 +46,7 @@ function verifyIndex (random, actualIndex, referenceIndex, message) {
   let lastReferenceBlock = referenceIndex.getLastBlock()
   if (!lastReferenceBlock) return
 
-  for (let row = 0; row <= lastReferenceBlock.position.row + 5; row++) {
+  for (let row = 0; row <= lastReferenceBlock.row + 5; row++) {
     let rowPixelPosition = referenceIndex.pixelPositionForRow(row)
     let nextRowPixelPosition = referenceIndex.pixelPositionForRow(row + 1)
     let betweenRowsPixelPosition = random.intBetween(rowPixelPosition, nextRowPixelPosition)
@@ -59,16 +58,15 @@ function verifyIndex (random, actualIndex, referenceIndex, message) {
 }
 
 function performInsertion (random, actualIndex, referenceIndex) {
-  let start = randomPoint(random, 100, 100)
+  let start = random(100)
   let height = random(100 + 1)
   let id = idCounter++
-  let inclusive = Boolean(random(2))
   let followsPosition = Boolean(random(2))
 
-  // document.write(`<div>performInsertion(${id}, ${formatPoint(start)}, ${height}, ${followsPosition})</div>`)
+  // document.write(`<div>performInsertion(${id}, ${start}, ${height}, ${followsPosition})</div>`)
 
-  referenceIndex.insertBlock(id, start, inclusive, height, followsPosition)
-  actualIndex.insertBlock(id, start, inclusive, height, followsPosition)
+  referenceIndex.insertBlock(id, start, height, followsPosition)
+  actualIndex.insertBlock(id, start, height, followsPosition)
 }
 
 function performRemoval (random, actualIndex, referenceIndex) {
@@ -86,12 +84,12 @@ function performMove (random, actualIndex, referenceIndex) {
   if (referenceIndex.allBlocks().length === 0) return
 
   let id = getRandomBlockId(random, referenceIndex)
-  let newPosition = randomPoint(random, 100, 100)
+  let newRow = random(100)
 
-  // document.write(`<div>performMove(${id}, ${formatPoint(newPosition)})</div>`)
+  // document.write(`<div>performMove(${id}, ${newRow})</div>`)
 
-  referenceIndex.moveBlock(id, newPosition)
-  actualIndex.moveBlock(id, newPosition)
+  referenceIndex.moveBlock(id, newRow)
+  actualIndex.moveBlock(id, newRow)
 }
 
 function performResize (random, actualIndex, referenceIndex) {
@@ -107,23 +105,19 @@ function performResize (random, actualIndex, referenceIndex) {
 }
 
 function performSplice (random, actualIndex, referenceIndex) {
-  let start = randomPoint(random, 100, 100)
-  let oldExtent = ZERO_POINT
-  while (random(2) > 0) oldExtent = traverse(oldExtent, randomPoint(random, 5, 5))
-  let newExtent = ZERO_POINT
-  while (random(2) > 0) newExtent = traverse(newExtent, randomPoint(random, 5, 5))
+  let start = random(100)
+  let oldExtent = 0
+  while (random(2) > 0) oldExtent += random(5)
+  let newExtent = 0
+  while (random(2) > 0) newExtent += random(5)
 
-  // document.write(`<div>performSplice(${formatPoint(start)}, ${formatPoint(oldExtent)}, ${formatPoint(newExtent)})</div>`)
+  // document.write(`<div>performSplice(${start}, ${oldExtent}, ${newExtent})</div>`)
 
   let referenceTouchedBlocks = referenceIndex.splice(start, oldExtent, newExtent)
   let actualTouchedBlocks = actualIndex.splice(start, oldExtent, newExtent)
 
   referenceTouchedBlocks.forEach(id => assert.equal(actualTouchedBlocks.has(id), true))
   actualTouchedBlocks.forEach(id => assert.equal(referenceTouchedBlocks.has(id), true))
-}
-
-function randomPoint(random, maxRow, maxColumn) {
-  return {row: random(maxRow), column: 0}
 }
 
 function getRandomBlockId (random, referenceIndex) {

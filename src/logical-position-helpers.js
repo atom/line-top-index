@@ -1,21 +1,19 @@
-import {traverse, traversal, format as formatPoint, ZERO as ZERO_POINT} from './point-helpers'
-
-export const ZERO_POSITION = Object.freeze({point: ZERO_POINT, pixels: 0})
+export const ZERO_POSITION = Object.freeze({row: 0, pixels: 0})
 
 export function add (a, b) {
   return {
-    point: traverse(a.point, b.point),
+    row: a.row + b.row,
     pixels: a.pixels + b.pixels
   }
 }
 
 export function subtract (a, b) {
   return {
-    point: traversal(a.point, b.point),
+    row: a.row - b.row,
     pixels: a.pixels - b.pixels
   }
 }
 
 export function format (position) {
-  return `(point: ${formatPoint(position.point)}, pixels: ${position.pixels})`
+  return `(row: ${position.row}, pixels: ${position.pixels})`
 }
