@@ -15,7 +15,7 @@ export default class Iterator {
     this.setCurrentNode(this.tree.root)
   }
 
-  insertNode (row, matchNodesAtSamePosition=true) {
+  insertNode (row, matchNodesAtSameRow=true) {
     this.reset()
 
     if (!this.currentNode) {
@@ -30,7 +30,7 @@ export default class Iterator {
         } else {
           return this.insertLeftChild(row)
         }
-      } else if (row === this.currentPosition.row && matchNodesAtSamePosition) {
+      } else if (row === this.currentPosition.row && matchNodesAtSameRow) {
         return this.currentNode
       } else { // row > this.currentPosition.row
         if (this.currentNode.right) {

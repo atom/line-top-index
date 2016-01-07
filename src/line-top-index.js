@@ -21,27 +21,27 @@ export default class LineTopIndex {
     return new Iterator(this)
   }
 
-  insertBlock (id, position, blockHeight, followsPosition) {
-    let node = this.iterator.insertNode(position)
+  insertBlock (id, row, blockHeight, isAfterRow=false) {
+    let node = this.iterator.insertNode(row)
     if (node.priority == null) {
       node.priority = this.generateRandom()
       this.bubbleNodeUp(node)
     }
 
-    this.adjustNodeBlockHeight(node, +blockHeight, followsPosition)
+    this.adjustNodeBlockHeight(node, +blockHeight, isAfterRow)
 
     node.blockIds.add(id)
     this.blockEndNodesById[id] = node
     this.blockHeightsById[id] = blockHeight
-    if (followsPosition) this.followingBlockIds.add(id)
+    if (isAfterRow) this.followingBlockIds.add(id)
   }
 
   removeBlock (id) {
     let node = this.blockEndNodesById[id]
     let blockHeight = this.blockHeightsById[id]
-    let followsPosition = this.followingBlockIds.has(id)
+    let isAfterRow = this.followingBlockIds.has(id)
 
-    this.adjustNodeBlockHeight(node, -blockHeight, followsPosition)
+    this.adjustNodeBlockHeight(node, -blockHeight, isAfterRow)
     node.blockIds.delete(id)
     if (node.blockIds.size === 0) {
       this.deleteNode(node)
@@ -56,18 +56,18 @@ export default class LineTopIndex {
     let node = this.blockEndNodesById[id]
     let blockHeight = this.blockHeightsById[id]
     let delta = newBlockHeight - blockHeight
-    let followsPosition = this.followingBlockIds.has(id)
+    let isAfterRow = this.followingBlockIds.has(id)
 
-    this.adjustNodeBlockHeight(node, delta, followsPosition)
+    this.adjustNodeBlockHeight(node, delta, isAfterRow)
 
     this.blockHeightsById[id] = newBlockHeight
   }
 
-  moveBlock (id, newPosition) {
+  moveBlock (id, newRow) {
     let blockHeight = this.blockHeightsById[id]
-    let followsPosition = this.followingBlockIds.has(id)
+    let isAfterRow = this.followingBlockIds.has(id)
     this.removeBlock(id)
-    this.insertBlock(id, newPosition, blockHeight, followsPosition)
+    this.insertBlock(id, newRow, blockHeight, isAfterRow)
   }
 
   splice (start, oldExtent, newExtent) {
@@ -239,8 +239,8 @@ export default class LineTopIndex {
     root.distanceFromLeftAncestor = subtractLogicalPositions(root.distanceFromLeftAncestor, pivot.distanceFromLeftAncestor)
   }
 
-  adjustNodeBlockHeight (node, delta, followsPosition) {
-    if (followsPosition) node.followingBlockHeight += delta
+  adjustNodeBlockHeight (node, delta, isAfterRow) {
+    if (isAfterRow) node.followingBlockHeight += delta
     node.blockHeight += delta
     node.distanceFromLeftAncestor.pixels += delta
     while (node.parent) {

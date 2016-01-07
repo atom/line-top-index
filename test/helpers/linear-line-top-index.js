@@ -8,8 +8,8 @@ export default class LinearLineTopIndex {
     this.defaultLineHeight = lineHeight
   }
 
-  insertBlock (id, row, height, followsPosition=false) {
-    this.blocks.push({id, row, height, followsPosition})
+  insertBlock (id, row, height, isAfterRow=false) {
+    this.blocks.push({id, row, height, isAfterRow})
     this.sortBlocks()
   }
 
@@ -71,7 +71,7 @@ export default class LinearLineTopIndex {
   }
 
   blocksPrecedingRow (row) {
-    return this.blocks.filter(b => b.row < row || (b.row === row && !b.followsPosition))
+    return this.blocks.filter(b => b.row < row || (b.row === row && !b.isAfterRow))
   }
 
   pixelPositionForRow (row) {

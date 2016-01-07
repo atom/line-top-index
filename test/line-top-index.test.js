@@ -61,12 +61,12 @@ function performInsertion (random, actualIndex, referenceIndex) {
   let start = random(100)
   let height = random(100 + 1)
   let id = idCounter++
-  let followsPosition = Boolean(random(2))
+  let isAfterRow = Boolean(random(2))
 
-  // document.write(`<div>performInsertion(${id}, ${start}, ${height}, ${followsPosition})</div>`)
+  // document.write(`<div>performInsertion(${id}, ${start}, ${height}, ${isAfterRow})</div>`)
 
-  referenceIndex.insertBlock(id, start, height, followsPosition)
-  actualIndex.insertBlock(id, start, height, followsPosition)
+  referenceIndex.insertBlock(id, start, height, isAfterRow)
+  actualIndex.insertBlock(id, start, height, isAfterRow)
 }
 
 function performRemoval (random, actualIndex, referenceIndex) {
