@@ -1,5 +1,3 @@
-import {compare, traverse, traversal} from '../../src/point-helpers'
-
 export default class LinearLineTopIndex {
   constructor (params = {}) {
     this.blocks = []
@@ -10,16 +8,9 @@ export default class LinearLineTopIndex {
     this.defaultLineHeight = lineHeight
   }
 
-  insertBlock (id, position, isInclusive, height, followsPosition=false) {
-    this.blocks.push({id, position, isInclusive, height, followsPosition})
+  insertBlock (id, row, height, followsPosition=false) {
+    this.blocks.push({id, row, height, followsPosition})
     this.sortBlocks()
-  }
-
-  setBlockInclusive (id, isInclusive) {
-    let block = this.blocks.find((block) => block.id === id)
-    if (block) {
-      block.isInclusive = isInclusive
-    }
   }
 
   resizeBlock (id, height) {
@@ -29,10 +20,10 @@ export default class LinearLineTopIndex {
     }
   }
 
-  moveBlock (id, newPosition) {
+  moveBlock (id, newRow) {
     let block = this.blocks.find((block) => block.id === id)
     if (block) {
-      block.position = newPosition
+      block.row = newRow
       this.sortBlocks()
     }
   }
@@ -45,7 +36,7 @@ export default class LinearLineTopIndex {
   }
 
   sortBlocks () {
-    this.blocks.sort((a, b) => compare(a.position, b.position))
+    this.blocks.sort((a, b) => a.row - b.row)
   }
 
   allBlocks () {
@@ -57,18 +48,17 @@ export default class LinearLineTopIndex {
   }
 
   splice (start, oldExtent, newExtent) {
-    let oldEnd = traverse(start, oldExtent)
-    let newEnd = traverse(start, newExtent)
+    let oldEnd = start + oldExtent
+    let newEnd = start + newExtent
 
     let touchedBlocks = new Set
 
     this.blocks.forEach(block => {
-      let comparison = compare(block.position, start)
-      if (comparison > 0 || (comparison >= 0 && block.isInclusive)) {
-        if (compare(block.position, traverse(start, oldExtent)) >= 0) {
-          block.position = traverse(newEnd, traversal(block.position, oldEnd))
+      if (block.row >= start) {
+        if (block.row >= oldEnd) {
+          block.row = newEnd + (block.row - oldEnd)
         } else {
-          block.position = traverse(start, newExtent)
+          block.row = start + newExtent
           touchedBlocks.add(block.id)
         }
       }
@@ -79,7 +69,7 @@ export default class LinearLineTopIndex {
   }
 
   blocksPrecedingRow (row) {
-    return this.blocks.filter(b => b.position.row < row || (b.position.row == row && !b.followsPosition))
+    return this.blocks.filter(b => b.row < row || (b.row === row && !b.followsPosition))
   }
 
   pixelPositionForRow (row) {
@@ -94,9 +84,9 @@ export default class LinearLineTopIndex {
     let lastBlockRow = 0
 
     for (let block of this.blocks) {
-      let nextBlockTop = precedingBlocksHeight + (block.position.row * this.defaultLineHeight)
+      let nextBlockTop = precedingBlocksHeight + (block.row * this.defaultLineHeight)
       if (nextBlockTop > top) break
-      lastBlockRow = block.position.row
+      lastBlockRow = block.row
       lastBlockBottom = nextBlockTop + block.height
       precedingBlocksHeight += block.height
     }
