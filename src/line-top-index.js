@@ -94,14 +94,11 @@ export default class LineTopIndex {
       startNode.distanceFromLeftAncestor.pixels -= this.blockHeightsById[id]
       if (this.followingBlockIds.has(id)) startNode.followingBlockHeight -= this.blockHeightsById[id]
 
-      if (!isInsertion) touchedBlocks.add(id)
-
       blocksIdsToMove.add(id)
     })
 
     if (startNode.right) {
       this.blockIdsForSubtree(startNode.right).forEach(id => {
-        touchedBlocks.add(id)
         blocksIdsToMove.add(id)
       })
 
@@ -116,6 +113,7 @@ export default class LineTopIndex {
     })
 
     endNode.distanceFromLeftAncestor.row = newEnd
+    endNode.blockIds.forEach(id => touchedBlocks.add(id))
 
     if (startNode.distanceFromLeftAncestor.row === endNode.distanceFromLeftAncestor.row) {
       endNode.blockIds.forEach(id => {

@@ -48,14 +48,16 @@ export default class LinearLineTopIndex {
   }
 
   splice (start, oldExtent, newExtent) {
+    if (oldExtent === 0 && newExtent === 0) return new Set()
+
     let oldEnd = start + oldExtent
     let newEnd = start + newExtent
 
-    let touchedBlocks = new Set
+    let touchedBlocks = new Set()
 
     this.blocks.forEach(block => {
       if (block.row >= start) {
-        if (block.row >= oldEnd) {
+        if (block.row > oldEnd) {
           block.row = newEnd + (block.row - oldEnd)
         } else {
           block.row = start + newExtent

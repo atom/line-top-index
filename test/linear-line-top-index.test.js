@@ -22,6 +22,15 @@ describe('LinearLineTopIndex', function () {
       assert.equal(touchedBlocks.has(2), false)
       assert.equal(touchedBlocks.has(3), true)
       assert.equal(touchedBlocks.has(4), true)
+      assert.equal(touchedBlocks.has(5), true)
+      assert.equal(touchedBlocks.has(6), false)
+
+      touchedBlocks = lineTopIndex.splice(0, 0, 1)
+
+      assert.equal(touchedBlocks.has(1), true)
+      assert.equal(touchedBlocks.has(2), true)
+      assert.equal(touchedBlocks.has(3), false)
+      assert.equal(touchedBlocks.has(4), false)
       assert.equal(touchedBlocks.has(5), false)
       assert.equal(touchedBlocks.has(6), false)
     })
