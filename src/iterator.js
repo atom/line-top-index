@@ -42,7 +42,7 @@ export default class Iterator {
     }
   }
 
-  totalBlockPixelsPrecedingRow (row) {
+  inclusiveTotalBlockPixelsPrecedingRow (row) {
     this.reset()
 
     if (!this.currentNode) return 0
@@ -56,6 +56,28 @@ export default class Iterator {
         }
       } else if (row === this.currentPosition.row) {
         return this.currentPosition.pixels - this.currentNode.followingBlockHeight
+      } else { // row > this.currentPosition.row
+        if (this.currentNode.right) {
+          this.descendRight()
+        } else {
+          return this.currentPosition.pixels
+        }
+      }
+    }
+  }
+
+  exclusiveTotalBlockPixelsPrecedingRow (row) {
+    this.reset()
+
+    if (!this.currentNode) return 0
+
+    while (true) {
+      if (row <= this.currentPosition.row) {
+        if (this.currentNode.left) {
+          this.descendLeft()
+        } else {
+          return this.leftAncestorPosition.pixels
+        }
       } else { // row > this.currentPosition.row
         if (this.currentNode.right) {
           this.descendRight()

@@ -36,6 +36,84 @@ describe('LinearLineTopIndex', function () {
     })
   })
 
+  describe('.prototype.pixelPositionForFirstBlockAtRow(row)', function () {
+    it('performs the simple math when there are no block decorations', function () {
+      assert.equal(lineTopIndex.pixelPositionForFirstBlockAtRow(0), 0 * 10)
+      assert.equal(lineTopIndex.pixelPositionForFirstBlockAtRow(4), 4 * 10)
+      assert.equal(lineTopIndex.pixelPositionForFirstBlockAtRow(5), 5 * 10)
+      assert.equal(lineTopIndex.pixelPositionForFirstBlockAtRow(12), 12 * 10)
+
+      lineTopIndex.splice(0, 2, 3)
+
+      assert.equal(lineTopIndex.pixelPositionForFirstBlockAtRow(0), 0 * 10)
+      assert.equal(lineTopIndex.pixelPositionForFirstBlockAtRow(4), 4 * 10)
+      assert.equal(lineTopIndex.pixelPositionForFirstBlockAtRow(5), 5 * 10)
+      assert.equal(lineTopIndex.pixelPositionForFirstBlockAtRow(12), 12 * 10)
+      assert.equal(lineTopIndex.pixelPositionForFirstBlockAtRow(13), 13 * 10)
+    })
+
+    it('takes into account inserted and removed blocks', function () {
+      lineTopIndex.insertBlock(1, 0, 10, false)
+      lineTopIndex.insertBlock(2, 3, 20, false)
+      lineTopIndex.insertBlock(3, 5, 20, false)
+      lineTopIndex.insertBlock(4, 5, 30, true)
+
+      assert.equal(lineTopIndex.pixelPositionForFirstBlockAtRow(0), (0 * 10) + 0)
+      assert.equal(lineTopIndex.pixelPositionForFirstBlockAtRow(1), (1 * 10) + 10)
+      assert.equal(lineTopIndex.pixelPositionForFirstBlockAtRow(2), (2 * 10) + 10)
+      assert.equal(lineTopIndex.pixelPositionForFirstBlockAtRow(3), (3 * 10) + 10)
+      assert.equal(lineTopIndex.pixelPositionForFirstBlockAtRow(4), (4 * 10) + 10 + 20)
+      assert.equal(lineTopIndex.pixelPositionForFirstBlockAtRow(5), (5 * 10) + 10 + 20)
+      assert.equal(lineTopIndex.pixelPositionForFirstBlockAtRow(6), (6 * 10) + 10 + 20 + 20 + 30)
+
+      lineTopIndex.removeBlock(1)
+      lineTopIndex.removeBlock(3)
+
+      assert.equal(lineTopIndex.pixelPositionForFirstBlockAtRow(0), (0 * 10) + 0)
+      assert.equal(lineTopIndex.pixelPositionForFirstBlockAtRow(1), (1 * 10) + 0)
+      assert.equal(lineTopIndex.pixelPositionForFirstBlockAtRow(2), (2 * 10) + 0)
+      assert.equal(lineTopIndex.pixelPositionForFirstBlockAtRow(3), (3 * 10) + 0)
+      assert.equal(lineTopIndex.pixelPositionForFirstBlockAtRow(4), (4 * 10) + 20)
+      assert.equal(lineTopIndex.pixelPositionForFirstBlockAtRow(5), (5 * 10) + 20)
+      assert.equal(lineTopIndex.pixelPositionForFirstBlockAtRow(6), (6 * 10) + 20 + 30)
+    })
+
+    it('moves blocks down/up when splicing regions', function () {
+      lineTopIndex.insertBlock(1, 3, 20)
+      lineTopIndex.insertBlock(2, 5, 30)
+
+      lineTopIndex.splice(0, 0, 4)
+
+      assert.equal(lineTopIndex.pixelPositionForFirstBlockAtRow(0), (0 * 10) + 0)
+      assert.equal(lineTopIndex.pixelPositionForFirstBlockAtRow(6), (6 * 10) + 0)
+      assert.equal(lineTopIndex.pixelPositionForFirstBlockAtRow(7), (7 * 10) + 0)
+      assert.equal(lineTopIndex.pixelPositionForFirstBlockAtRow(8), (8 * 10) + 20)
+      assert.equal(lineTopIndex.pixelPositionForFirstBlockAtRow(9), (9 * 10) + 20)
+      assert.equal(lineTopIndex.pixelPositionForFirstBlockAtRow(10), (10 * 10) + 20 + 30)
+      assert.equal(lineTopIndex.pixelPositionForFirstBlockAtRow(11), (11 * 10) + 20 + 30)
+
+      lineTopIndex.splice(0, 6, 2)
+
+      assert.equal(lineTopIndex.pixelPositionForFirstBlockAtRow(0), (0 * 10) + 0)
+      assert.equal(lineTopIndex.pixelPositionForFirstBlockAtRow(3), (3 * 10) + 0)
+      assert.equal(lineTopIndex.pixelPositionForFirstBlockAtRow(4), (4 * 10) + 20)
+      assert.equal(lineTopIndex.pixelPositionForFirstBlockAtRow(5), (5 * 10) + 20)
+      assert.equal(lineTopIndex.pixelPositionForFirstBlockAtRow(6), (6 * 10) + 20 + 30)
+
+      lineTopIndex.splice(2, 4, 0)
+
+      assert.equal(lineTopIndex.pixelPositionForFirstBlockAtRow(0), (0 * 10) + 0)
+      assert.equal(lineTopIndex.pixelPositionForFirstBlockAtRow(1), (1 * 10) + 0)
+      assert.equal(lineTopIndex.pixelPositionForFirstBlockAtRow(2), (2 * 10) + 0)
+      assert.equal(lineTopIndex.pixelPositionForFirstBlockAtRow(3), (3 * 10) + 20 + 30)
+      assert.equal(lineTopIndex.pixelPositionForFirstBlockAtRow(4), (4 * 10) + 20 + 30)
+      assert.equal(lineTopIndex.pixelPositionForFirstBlockAtRow(5), (5 * 10) + 20 + 30)
+      assert.equal(lineTopIndex.pixelPositionForFirstBlockAtRow(6), (6 * 10) + 20 + 30)
+      assert.equal(lineTopIndex.pixelPositionForFirstBlockAtRow(7), (7 * 10) + 20 + 30)
+      assert.equal(lineTopIndex.pixelPositionForFirstBlockAtRow(8), (8 * 10) + 20 + 30)
+    })
+  })
+
   describe('.prototype.pixelPositionForRow(row)', function () {
     it('performs the simple math when there are no block decorations', function () {
       assert.equal(lineTopIndex.pixelPositionForRow(0), 0 * 10)

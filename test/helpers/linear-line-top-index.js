@@ -70,13 +70,15 @@ export default class LinearLineTopIndex {
     return touchedBlocks
   }
 
-  blocksPrecedingRow (row) {
-    return this.blocks.filter(b => b.row < row || (b.row === row && !b.isAfterRow))
-  }
-
   pixelPositionForRow (row) {
     let linesHeight = row * this.defaultLineHeight
-    let blocksHeight = this.blocksPrecedingRow(row).reduce((a, b) => a + b.height, 0)
+    let blocksHeight = this.blocks.filter(b => b.row < row || (b.row === row && !b.isAfterRow)).reduce((a, b) => a + b.height, 0)
+    return linesHeight + blocksHeight
+  }
+
+  pixelPositionForFirstBlockAtRow (row) {
+    let linesHeight = row * this.defaultLineHeight
+    let blocksHeight = this.blocks.filter(b => b.row < row).reduce((a, b) => a + b.height, 0)
     return linesHeight + blocksHeight
   }
 

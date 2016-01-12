@@ -143,7 +143,11 @@ export default class LineTopIndex {
   }
 
   pixelPositionForRow (row) {
-    return (row * this.defaultLineHeight) + this.iterator.totalBlockPixelsPrecedingRow(row)
+    return (row * this.defaultLineHeight) + this.iterator.inclusiveTotalBlockPixelsPrecedingRow(row)
+  }
+
+  pixelPositionForFirstBlockAtRow (row) {
+    return (row * this.defaultLineHeight) + this.iterator.exclusiveTotalBlockPixelsPrecedingRow(row)
   }
 
   rowForPixelPosition (pixelPosition) {
