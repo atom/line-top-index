@@ -142,11 +142,11 @@ export default class LineTopIndex {
     return touchedBlocks
   }
 
-  pixelPositionForRow (row) {
+  pixelPositionAfterBlocksForRow (row) {
     return (row * this.defaultLineHeight) + this.iterator.inclusiveTotalBlockPixelsPrecedingRow(row)
   }
 
-  pixelPositionForFirstBlockAtRow (row) {
+  pixelPositionBeforeBlocksForRow (row) {
     return (row * this.defaultLineHeight) + this.iterator.exclusiveTotalBlockPixelsPrecedingRow(row)
   }
 

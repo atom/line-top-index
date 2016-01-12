@@ -47,14 +47,14 @@ function verifyIndex (random, actualIndex, referenceIndex, message) {
   if (!lastReferenceBlock) return
 
   for (let row = 0; row <= lastReferenceBlock.row + 5; row++) {
-    let rowPixelPosition = referenceIndex.pixelPositionForRow(row)
-    let firstBlockPixelPosition = referenceIndex.pixelPositionForFirstBlockAtRow(row)
-    let nextRowPixelPosition = referenceIndex.pixelPositionForRow(row + 1)
+    let rowPixelPosition = referenceIndex.pixelPositionAfterBlocksForRow(row)
+    let firstBlockPixelPosition = referenceIndex.pixelPositionBeforeBlocksForRow(row)
+    let nextRowPixelPosition = referenceIndex.pixelPositionAfterBlocksForRow(row + 1)
     let betweenRowsPixelPosition = random.intBetween(rowPixelPosition, nextRowPixelPosition)
 
     // console.log(row);
-    assert.equal(actualIndex.pixelPositionForRow(row), rowPixelPosition, message)
-    assert.equal(actualIndex.pixelPositionForFirstBlockAtRow(row), firstBlockPixelPosition, message)
+    assert.equal(actualIndex.pixelPositionAfterBlocksForRow(row), rowPixelPosition, message)
+    assert.equal(actualIndex.pixelPositionBeforeBlocksForRow(row), firstBlockPixelPosition, message)
     assert.equal(actualIndex.rowForPixelPosition(betweenRowsPixelPosition), referenceIndex.rowForPixelPosition(betweenRowsPixelPosition), message)
   }
 }
