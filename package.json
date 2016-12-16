@@ -21,7 +21,7 @@
   "author": "Nathan Sobo <nathan@github.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/nathansobo/atom-patch/issues"
+    "url": "https://github.com/atom/line-top-index/issues"
   },
   "homepage": "https://github.com/atom/line-top-index",
   "devDependencies": {
