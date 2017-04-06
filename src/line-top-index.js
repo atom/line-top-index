@@ -8,9 +8,9 @@ export default class LineTopIndex {
     this.randomGenerator = new Random(params.seed || Date.now())
     this.root = null
     this.iterator = this.buildIterator()
-    this.blockEndNodesById = {}
-    this.blockHeightsById = {}
-    this.followingBlockIds = new Set
+    this.blockEndNodesById = new Map()
+    this.blockHeightsById = new Map()
+    this.followingBlockIds = new Set()
   }
 
   setDefaultLineHeight (lineHeight) {
@@ -31,14 +31,14 @@ export default class LineTopIndex {
     this.adjustNodeBlockHeight(node, +blockHeight, isAfterRow)
 
     node.blockIds.add(id)
-    this.blockEndNodesById[id] = node
-    this.blockHeightsById[id] = blockHeight
+    this.blockEndNodesById.set(id, node)
+    this.blockHeightsById.set(id, blockHeight)
     if (isAfterRow) this.followingBlockIds.add(id)
   }
 
   removeBlock (id) {
-    let node = this.blockEndNodesById[id]
-    let blockHeight = this.blockHeightsById[id]
+    let node = this.blockEndNodesById.get(id)
+    let blockHeight = this.blockHeightsById.get(id)
     let isAfterRow = this.followingBlockIds.has(id)
 
     this.adjustNodeBlockHeight(node, -blockHeight, isAfterRow)
@@ -47,24 +47,22 @@ export default class LineTopIndex {
       this.deleteNode(node)
     }
 
-    delete this.blockEndNodesById[id]
-    delete this.blockHeightsById[id]
+    this.blockEndNodesById.delete(id)
+    this.blockHeightsById.delete(id)
     this.followingBlockIds.delete(id)
   }
 
   resizeBlock (id, newBlockHeight) {
-    let node = this.blockEndNodesById[id]
-    let blockHeight = this.blockHeightsById[id]
+    let node = this.blockEndNodesById.get(id)
+    let blockHeight = this.blockHeightsById.get(id)
     let delta = newBlockHeight - blockHeight
     let isAfterRow = this.followingBlockIds.has(id)
-
     this.adjustNodeBlockHeight(node, delta, isAfterRow)
-
-    this.blockHeightsById[id] = newBlockHeight
+    this.blockHeightsById.set(id, newBlockHeight)
   }
 
   moveBlock (id, newRow) {
-    let blockHeight = this.blockHeightsById[id]
+    let blockHeight = this.blockHeightsById.get(id)
     let isAfterRow = this.followingBlockIds.has(id)
     this.removeBlock(id)
     this.insertBlock(id, newRow, blockHeight, isAfterRow)
@@ -89,10 +87,11 @@ export default class LineTopIndex {
     this.bubbleNodeUp(endNode)
 
     startNode.blockIds.forEach(id => {
+      const blockHeight = this.blockHeightsById.get(id)
       startNode.blockIds.delete(id)
-      startNode.blockHeight -= this.blockHeightsById[id]
-      startNode.distanceFromLeftAncestor.pixels -= this.blockHeightsById[id]
-      if (this.followingBlockIds.has(id)) startNode.followingBlockHeight -= this.blockHeightsById[id]
+      startNode.blockHeight -= blockHeight
+      startNode.distanceFromLeftAncestor.pixels -= blockHeight
+      if (this.followingBlockIds.has(id)) startNode.followingBlockHeight -= blockHeight
 
       blocksIdsToMove.add(id)
     })
@@ -106,10 +105,11 @@ export default class LineTopIndex {
     }
 
     blocksIdsToMove.forEach(id => {
+      const blockHeight = this.blockHeightsById.get(id)
       endNode.blockIds.add(id)
-      endNode.blockHeight += this.blockHeightsById[id]
-      if (this.followingBlockIds.has(id)) endNode.followingBlockHeight += this.blockHeightsById[id]
-      this.blockEndNodesById[id] = endNode
+      endNode.blockHeight += blockHeight
+      if (this.followingBlockIds.has(id)) endNode.followingBlockHeight += blockHeight
+      this.blockEndNodesById.set(id, endNode)
     })
 
     endNode.distanceFromLeftAncestor.row = newEnd
@@ -117,11 +117,12 @@ export default class LineTopIndex {
 
     if (startNode.distanceFromLeftAncestor.row === endNode.distanceFromLeftAncestor.row) {
       endNode.blockIds.forEach(id => {
+        const blockHeight = this.blockHeightsById.get(id)
         startNode.blockIds.add(id)
-        startNode.blockHeight += this.blockHeightsById[id]
-        startNode.distanceFromLeftAncestor.pixels += this.blockHeightsById[id]
-        if (this.followingBlockIds.has(id)) startNode.followingBlockHeight += this.blockHeightsById[id]
-        this.blockEndNodesById[id] = startNode
+        startNode.blockHeight += blockHeight
+        startNode.distanceFromLeftAncestor.pixels += blockHeight
+        if (this.followingBlockIds.has(id)) startNode.followingBlockHeight += blockHeight
+        this.blockEndNodesById.set(id, startNode)
       })
 
       this.deleteNode(endNode)

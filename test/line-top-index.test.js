@@ -5,6 +5,32 @@ import LineTopIndex from '../src/line-top-index'
 let idCounter
 
 describe('LineTopIndex', () => {
+  it('supports using object as block ids', function () {
+    const id1 = {}
+    const id2 = {}
+    let index = new LineTopIndex({defaultLineHeight: 1, maxRow: 100})
+    index.insertBlock(id1, 2, 4, false)
+    index.insertBlock(id2, 4, 7, true)
+    assert.equal(index.pixelPositionAfterBlocksForRow(2), 6)
+    assert.equal(index.pixelPositionAfterBlocksForRow(4), 8)
+    assert.equal(index.pixelPositionBeforeBlocksForRow(5), 16)
+
+    index.removeBlock(id1)
+    assert.equal(index.pixelPositionAfterBlocksForRow(2), 2)
+    assert.equal(index.pixelPositionAfterBlocksForRow(4), 4)
+    assert.equal(index.pixelPositionBeforeBlocksForRow(5), 12)
+
+    index.resizeBlock(id2, 8)
+    assert.equal(index.pixelPositionAfterBlocksForRow(2), 2)
+    assert.equal(index.pixelPositionAfterBlocksForRow(4), 4)
+    assert.equal(index.pixelPositionBeforeBlocksForRow(5), 13)
+
+    index.moveBlock(id2, 2)
+    assert.equal(index.pixelPositionBeforeBlocksForRow(3), 11)
+    assert.equal(index.pixelPositionAfterBlocksForRow(4), 12)
+    assert.equal(index.pixelPositionBeforeBlocksForRow(5), 13)
+  })
+
   it('determines line heights correctly after randomized insertions, removals, and splices', function () {
     this.timeout(Infinity)
 
@@ -18,7 +44,7 @@ describe('LineTopIndex', () => {
       let actualIndex = new LineTopIndex({seed, defaultLineHeight, maxRow})
       idCounter = 1
 
-      for (let j = 0; j < 900; j++) {
+      for (let j = 0; j < 100; j++) {
         let k = random(10)
         if (k < 3) {
           performInsertion(random, actualIndex, referenceIndex)

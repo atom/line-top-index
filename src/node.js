@@ -10,6 +10,6 @@ export default class Node {
     this.priority = null
     this.blockHeight = 0
     this.followingBlockHeight = 0
-    this.blockIds = new Set
+    this.blockIds = new Set()
   }
 }
