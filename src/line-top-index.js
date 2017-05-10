@@ -13,6 +13,10 @@ export default class LineTopIndex {
     this.followingBlockIds = new Set()
   }
 
+  isEmpty () {
+    return this.blockEndNodesById.size === 0
+  }
+
   setDefaultLineHeight (lineHeight) {
     this.defaultLineHeight = lineHeight
   }
@@ -69,7 +73,7 @@ export default class LineTopIndex {
   }
 
   splice (start, oldExtent, newExtent) {
-    if (oldExtent === 0 && newExtent === 0) return new Set()
+    if (this.isEmpty() || (oldExtent === 0 && newExtent === 0)) return new Set()
 
     let oldEnd = start + oldExtent
     let newEnd = start + newExtent
@@ -144,15 +148,29 @@ export default class LineTopIndex {
   }
 
   pixelPositionAfterBlocksForRow (row) {
-    return (row * this.defaultLineHeight) + this.iterator.inclusiveTotalBlockPixelsPrecedingRow(row)
+    let pixelPosition = row * this.defaultLineHeight
+    if (!this.isEmpty()) {
+      pixelPosition += this.iterator.inclusiveTotalBlockPixelsPrecedingRow(row)
+    }
+
+    return pixelPosition
   }
 
   pixelPositionBeforeBlocksForRow (row) {
-    return (row * this.defaultLineHeight) + this.iterator.exclusiveTotalBlockPixelsPrecedingRow(row)
+    let pixelPosition = row * this.defaultLineHeight
+    if (!this.isEmpty()) {
+      pixelPosition += this.iterator.exclusiveTotalBlockPixelsPrecedingRow(row)
+    }
+
+    return pixelPosition
   }
 
   rowForPixelPosition (pixelPosition) {
-    return this.iterator.rowForPixelPosition(pixelPosition, this.defaultLineHeight)
+    if (this.isEmpty()) {
+      return Math.floor(pixelPosition / this.defaultLineHeight)
+    } else {
+      return this.iterator.rowForPixelPosition(pixelPosition, this.defaultLineHeight)
+    }
   }
 
   deleteNode (node) {

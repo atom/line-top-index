@@ -34,7 +34,7 @@ describe('LineTopIndex', () => {
   it('determines line heights correctly after randomized insertions, removals, and splices', function () {
     this.timeout(Infinity)
 
-    for (let i = 0; i < 7000; i++) {
+    for (let i = 0; i < 200; i++) {
       let seed = Date.now()
       let random = new Random(seed)
 
@@ -44,7 +44,7 @@ describe('LineTopIndex', () => {
       let actualIndex = new LineTopIndex({seed, defaultLineHeight, maxRow})
       idCounter = 1
 
-      for (let j = 0; j < 100; j++) {
+      for (let j = 0; j < 50; j++) {
         let k = random(10)
         if (k < 3) {
           performInsertion(random, actualIndex, referenceIndex)
@@ -61,17 +61,14 @@ describe('LineTopIndex', () => {
         // document.write('<hr>')
         // document.write(actualIndex.toHTML())
         // document.write('<hr>')
+        verifyIndex(random, actualIndex, referenceIndex, `Seed: ${seed}`)
       }
-
-      verifyIndex(random, actualIndex, referenceIndex, `Seed: ${seed}`)
     }
   })
 })
 
 function verifyIndex (random, actualIndex, referenceIndex, message) {
-  let lastReferenceBlock = referenceIndex.getLastBlock()
-  if (!lastReferenceBlock) return
-
+  let lastReferenceBlock = referenceIndex.getLastBlock() || {row: 0}
   for (let row = 0; row <= lastReferenceBlock.row + 5; row++) {
     let rowPixelPosition = referenceIndex.pixelPositionAfterBlocksForRow(row)
     let firstBlockPixelPosition = referenceIndex.pixelPositionBeforeBlocksForRow(row)
