@@ -1,4 +1,5 @@
-# line-top-index
+##### Atom and all repositories under Atom will be archived on December 15, 2022. Learn more in our [official announcement](https://github.blog/2022-06-08-sunsetting-atom/)
+ # line-top-index
 
 This is a module used by Atom to keep track of block decorations and to efficiently compute spatial conversions from pixels to rows and viceversa.
 
